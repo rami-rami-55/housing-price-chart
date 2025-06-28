@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start React App",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "client"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Django Server",
+      "type": "shell",
+      "command": "python manage.py runserver",
+      "options": {
+        "cwd": "server"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Fullstack App",
+      "dependsOn": ["Start React App", "Start Django Server"],
+      "dependsOrder": "parallel"
+    }
+  ]
+}
