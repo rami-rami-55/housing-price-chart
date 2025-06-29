@@ -1,13 +1,12 @@
-import { Select as ChakraSelect } from '@chakra-ui/react';
+import { Select } from '@chakra-ui/react';
 import styled from 'styled-components';
 
 const SelectWrapper = styled.div`
-  width: 180px;
-  font-size: 24px;
   background-color: #ffffff;
+  width: 100%;
+  font-size: 24px;
   border-radius: 8px;
-  text-align: center;
-  text-align-last: center;
+  text-align: left;
 `;
 
 type Option = {
@@ -20,24 +19,16 @@ type SelectProps = {
   options: Option[];
 };
 
-const Select: React.FC<SelectProps> = ({ placeholder, options }) => {
+export const CustomSelect: React.FC<SelectProps> = ({ placeholder, options }) => {
   return (
     <SelectWrapper>
-      <ChakraSelect
-        placeholder={placeholder}
-        size="md"
-        fontSize="24px"
-        borderRadius="8px"
-        textAlign="center"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
+      <Select placeholder={placeholder} size="md" variant="outline" bg="white" textAlign="left">
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
-      </ChakraSelect>
+      </Select>
     </SelectWrapper>
   );
 };
-
-export default Select;
