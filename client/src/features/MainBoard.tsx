@@ -27,10 +27,10 @@ const MainBoard: React.FC = () => {
 
   return (
     <main className="main-content flex-1 h-full p-6 flex flex-col min-w-0 bg-gray-100 overflow-y-auto">
-      {/* タブ切り替えと期間選択を同じ行に配置 */}
-      <div className="flex items-center justify-between mb-4 flex-wrap">
-        {/* タブグループ (左側) */}
-        <div className="flex space-x-2 sm:space-x-4 mb-2 sm:mb-0">
+      {/* タブ切り替え */}
+      <div className="flex items-center mb-4">
+        {/* タブグループ */}
+        <div className="flex space-x-2 sm:space-x-4">
           {/* グラフのタブ */}
           <button
             onClick={() => setCurrentView('chart')}
@@ -54,20 +54,6 @@ const MainBoard: React.FC = () => {
             取引履歴
           </button>
         </div>
-
-        {/* 期間選択 (右側) */}
-        <div className="flex items-center">
-          <label
-            htmlFor="select-duration"
-            className="text-gray-700 font-semibold mr-4 whitespace-nowrap text-sm sm:text-base"
-          >
-            集計期間:
-          </label>
-          <DurationSelector
-            selectedDuration={selectedDuration}
-            onDurationChange={handleDurationChange}
-          />
-        </div>
       </div>
 
       {/* タブコンテンツエリア */}
@@ -75,8 +61,18 @@ const MainBoard: React.FC = () => {
         {currentView === 'chart' ? (
           /* グラフコンテンツ */
           <div className="w-full h-full bg-white p-6 rounded-xl shadow-2xl flex flex-col">
-            {/* グラフサブタブ */}
-            <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
+            {/* グラフサブタブと期間選択を横一列に */}
+            <div className="flex items-center justify-between mb-4">
+              <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
+
+              {/* 期間選択 (右側) */}
+              <div className="flex items-center">
+                <DurationSelector
+                  selectedDuration={selectedDuration}
+                  onDurationChange={handleDurationChange}
+                />
+              </div>
+            </div>
 
             {/* グラフコンテナ */}
             <div className="flex-1 relative min-h-[250px]">
