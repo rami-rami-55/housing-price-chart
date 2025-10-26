@@ -1,12 +1,7 @@
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import { Top } from './pages/Top';
+import Dashboard from './pages/Dashboard';
 
-const theme = extendTheme();
-
-const App: React.FC = () => (
-  <ChakraProvider theme={theme}>
-    <Top />
-  </ChakraProvider>
-);
+const App: React.FC = () => {
+  return <Dashboard />;
+};
 
 export default App;
