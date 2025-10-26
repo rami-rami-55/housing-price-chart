@@ -20,9 +20,7 @@ interface DashboardState {
   selectedStructure: string;
   selectedPropertyStatus: string;
   selectedPropertyType: string;
-  selectedPrefecture: string;
-  selectedCity: string;
-  selectedStation: string;
+  selectedAreaName: string;
   selectedLayout: string;
   startYear: string;
   endYear: string;
@@ -55,9 +53,7 @@ interface DashboardActions {
   handleStructureChange: (structure: string) => void;
   handlePropertyStatusChange: (status: string) => void;
   handlePropertyTypeChange: (type: string) => void;
-  handlePrefectureChange: (prefecture: string) => void;
-  handleCityChange: (city: string) => void;
-  handleStationChange: (station: string) => void;
+  handleAreaNameChange: (areaName: string) => void;
   handleLayoutChange: (layout: string) => void;
   handleStartYearChange: (year: string) => void;
   handleEndYearChange: (year: string) => void;
@@ -129,7 +125,7 @@ const generateChartLabels = (durationInYears: number): string[] => {
 const initialAreas: ComparisonArea[] = [
   {
     id: 'area-1',
-    name: '東京都世田谷区',
+    name: '世田谷',
     color: 'red',
     selected: true,
     propertyType: 'マンション',
@@ -142,7 +138,7 @@ const initialAreas: ComparisonArea[] = [
   },
   {
     id: 'area-2',
-    name: '神奈川県目黒区',
+    name: '自由が丘駅',
     color: 'green',
     selected: true,
     propertyType: 'マンション',
@@ -194,9 +190,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   const [selectedStructure, setSelectedStructure] = useState('wood');
   const [selectedPropertyStatus, setSelectedPropertyStatus] = useState('new');
   const [selectedPropertyType, setSelectedPropertyType] = useState('mansion');
-  const [selectedPrefecture, setSelectedPrefecture] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedStation, setSelectedStation] = useState('');
+  const [selectedAreaName, setSelectedAreaName] = useState('');
   const [selectedLayout, setSelectedLayout] = useState('1R_1K');
   const [startYear, setStartYear] = useState('2024');
   const [endYear, setEndYear] = useState('2024');
@@ -212,9 +206,63 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
 
   // アクションの実装
   const addArea = useCallback(() => {
-    // 実装はDashboard.tsxから移動
-    console.log('Add area called');
-  }, []);
+    if (!selectedAreaName.trim()) {
+      console.warn('比較エリアを追加するには、駅名/エリア名を入力してください。');
+      return;
+    }
+
+    // 利用可能な色を取得
+    const availableColors = ['red', 'green', 'yellow', 'purple', 'indigo', 'pink', 'teal'];
+    const assignedColors = comparisonAreas.map((a) => a.color);
+    const availableColor =
+      availableColors.find((color) => !assignedColors.includes(color)) ||
+      availableColors[comparisonAreas.length % availableColors.length];
+
+    const newAreaId = `area-${Date.now()}`;
+    const newArea: ComparisonArea = {
+      id: newAreaId,
+      name: selectedAreaName, // 駅名/エリア名のみを表示名とする
+      color: availableColor,
+      selected: true,
+      propertyType: selectedPropertyTypes[0] || 'マンション',
+      propertyStatus: selectedPropertyStatuses[0] || '新築',
+      structure: selectedStructures[0] || '木造',
+      layouts: selectedLayouts.length > 0 ? selectedLayouts : ['1R_1K'],
+      startYear: '2023',
+      endYear: '2024',
+      durationInYears: parseInt(selectedDuration),
+    };
+
+    setComparisonAreas((prev) => [...prev, newArea]);
+
+    // 新規エリアのダミーデータ生成（実際はAPIコールで取得）
+    const basePrice = 4000 + Math.random() * 2000;
+    const baseUnitPrice = 60 + Math.random() * 30;
+    const newAreaData: AreaData = {
+      priceData: Array.from({ length: 10 }, (_, i) => basePrice + (Math.random() - 0.5) * 500),
+      unitPriceData: Array.from(
+        { length: 10 },
+        (_, i) => baseUnitPrice + (Math.random() - 0.5) * 10
+      ),
+    };
+
+    // マスターデータに追加（本来はサーバーから取得）
+    areaMasterData[newAreaId] = newAreaData;
+
+    // フォームをクリア
+    setSelectedAreaName('');
+
+    console.log('Added new area:', newArea);
+  }, [
+    selectedAreaName,
+    selectedPropertyTypes,
+    selectedPropertyStatuses,
+    selectedStructures,
+    selectedLayouts,
+    selectedDuration,
+    comparisonAreas,
+    areaMasterData,
+  ]);
 
   const removeArea = useCallback((areaId: string) => {
     setComparisonAreas((prev) => prev.filter((area) => area.id !== areaId));
@@ -245,19 +293,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     console.log('Selected property type:', type);
   };
 
-  const handlePrefectureChange = (prefecture: string) => {
-    setSelectedPrefecture(prefecture);
-    console.log('Selected prefecture:', prefecture);
-  };
-
-  const handleCityChange = (city: string) => {
-    setSelectedCity(city);
-    console.log('Selected city:', city);
-  };
-
-  const handleStationChange = (station: string) => {
-    setSelectedStation(station);
-    console.log('Selected station:', station);
+  const handleAreaNameChange = (areaName: string) => {
+    setSelectedAreaName(areaName);
+    console.log('Selected area name:', areaName);
   };
 
   const handleLayoutChange = (layout: string) => {
@@ -342,9 +380,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     selectedStructure,
     selectedPropertyStatus,
     selectedPropertyType,
-    selectedPrefecture,
-    selectedCity,
-    selectedStation,
+    selectedAreaName,
     selectedLayout,
     startYear,
     endYear,
@@ -364,9 +400,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     handleStructureChange,
     handlePropertyStatusChange,
     handlePropertyTypeChange,
-    handlePrefectureChange,
-    handleCityChange,
-    handleStationChange,
+    handleAreaNameChange,
     handleLayoutChange,
     handleStartYearChange,
     handleEndYearChange,

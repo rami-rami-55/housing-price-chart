@@ -20,18 +20,14 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     selectedPropertyTypes,
     selectedStructures,
     selectedLayouts,
-    selectedPrefecture,
-    selectedCity,
-    selectedStation,
+    selectedAreaName,
     comparisonAreas,
 
     // アクション
     handlePropertyTypesChange,
     handleStructuresChange,
     handleLayoutsChange,
-    handlePrefectureChange,
-    handleCityChange,
-    handleStationChange,
+    handleAreaNameChange,
     handleSearch,
     toggleAreaSelection,
     removeArea,
@@ -62,12 +58,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </div>
 
         <LocationSelector
-          selectedPrefecture={selectedPrefecture}
-          selectedCity={selectedCity}
-          selectedStation={selectedStation}
-          onPrefectureChange={handlePrefectureChange}
-          onCityChange={handleCityChange}
-          onStationChange={handleStationChange}
+          selectedAreaName={selectedAreaName}
+          onAreaNameChange={handleAreaNameChange}
         />
 
         <SearchButton onSearch={handleSearch} />
