@@ -3,6 +3,12 @@ export type ComparisonArea = {
   name: string;
   color: string;
   selected: boolean;
+  propertyType?: string;
+  propertyStatus?: string;
+  structure?: string;
+  layouts?: string[];
+  startYear?: string;
+  endYear?: string;
 };
 
 export type AreaData = {

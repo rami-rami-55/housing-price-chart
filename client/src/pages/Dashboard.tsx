@@ -30,8 +30,30 @@ const initialChartLabels = [
 ];
 
 const initialAreas: ComparisonArea[] = [
-  { id: 'area-1', name: '東京都世田谷区', color: 'red', selected: true },
-  { id: 'area-2', name: '神奈川県目黒区', color: 'green', selected: true },
+  {
+    id: 'area-1',
+    name: '東京都世田谷区',
+    color: 'red',
+    selected: true,
+    propertyType: 'マンション',
+    propertyStatus: '新築',
+    structure: '木造',
+    layouts: ['2K', '2DK'],
+    startYear: '2023',
+    endYear: '2024',
+  },
+  {
+    id: 'area-2',
+    name: '神奈川県目黒区',
+    color: 'green',
+    selected: true,
+    propertyType: 'マンション',
+    propertyStatus: '中古',
+    structure: 'RC',
+    layouts: ['1R_1K'],
+    startYear: '2023',
+    endYear: '2024',
+  },
 ];
 
 const areaMasterData: Record<string, AreaData> = {
@@ -95,15 +117,49 @@ const Dashboard = () => {
       'area-5': '神奈川県横浜市',
     };
 
+    // 現在選択されている条件を取得
+    const getSelectedConditions = () => {
+      return {
+        propertyType:
+          selectedPropertyTypes.length > 0 ? selectedPropertyTypes[0] : selectedPropertyType,
+        propertyStatus:
+          selectedPropertyStatuses.length > 0
+            ? selectedPropertyStatuses[0]
+            : selectedPropertyStatus,
+        structure: selectedStructures.length > 0 ? selectedStructures[0] : selectedStructure,
+        layouts: selectedLayouts.length > 0 ? selectedLayouts : [selectedLayout],
+      };
+    };
+
+    const conditions = getSelectedConditions();
+
     const newArea: ComparisonArea = {
       id: nextAreaId,
       name: areaNames[nextAreaId],
       color: nextColor,
       selected: true,
+      propertyType: conditions.propertyType,
+      propertyStatus: conditions.propertyStatus,
+      structure: conditions.structure,
+      layouts: conditions.layouts,
+      startYear: startYear,
+      endYear: endYear,
     };
 
     setComparisonAreas((prev) => [...prev, newArea]);
-  }, [comparisonAreas]);
+  }, [
+    comparisonAreas,
+    selectedPropertyType,
+    selectedPropertyStatus,
+    selectedStructure,
+    selectedLayout,
+    selectedPropertyTypes,
+    selectedPropertyStatuses,
+    selectedStructures,
+    selectedLayouts,
+    startYear,
+    endYear,
+  ]);
 
   const removeArea = useCallback((areaId: string) => {
     setComparisonAreas((prev) => prev.filter((area) => area.id !== areaId));
