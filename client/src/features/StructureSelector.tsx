@@ -1,38 +1,30 @@
-import React, { useState } from 'react';
-import { ButtonGrid, SelectorBase } from '../components';
+import React from 'react';
+import { MultiSelectSelector } from '../components';
 
-interface StructureSelectorProps {
-  selectedStructure?: string;
-  onStructureChange?: (structure: string) => void;
+interface MultiStructureSelectorProps {
+  selectedStructures?: string[];
+  onStructuresChange?: (structures: string[]) => void;
 }
 
-const StructureSelector: React.FC<StructureSelectorProps> = ({
-  selectedStructure = 'wood',
-  onStructureChange,
+const MultiStructureSelector: React.FC<MultiStructureSelectorProps> = ({
+  selectedStructures = [],
+  onStructuresChange,
 }) => {
-  const [selected, setSelected] = useState(selectedStructure);
-
   const structures = [
     { id: 'wood', label: '木造', value: 'wood' },
     { id: 'rc', label: 'RC', value: 'rc' },
     { id: 'src', label: 'SRC', value: 'src' },
   ];
 
-  const handleStructureClick = (structure: string) => {
-    setSelected(structure);
-    onStructureChange?.(structure);
-  };
-
   return (
-    <SelectorBase title="構造">
-      <ButtonGrid
-        options={structures}
-        selectedValue={selected}
-        onValueChange={handleStructureClick}
-        gridCols="grid-cols-3"
-      />
-    </SelectorBase>
+    <MultiSelectSelector
+      title="構造"
+      options={structures}
+      selectedValues={selectedStructures}
+      onValuesChange={onStructuresChange}
+      gridCols="grid-cols-3"
+    />
   );
 };
 
-export default StructureSelector;
+export default MultiStructureSelector;

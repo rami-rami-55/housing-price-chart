@@ -1,0 +1,367 @@
+{
+  "apiSamples": {
+    "areaSearch": {
+      "request": {
+        "propertyTypes": ["mansion"],
+        "propertyStatuses": ["new", "used"],
+        "structures": ["wood", "RC"],
+        "layouts": ["2K", "2DK", "1R_1K"],
+        "prefecture": "tokyo",
+        "city": "setagaya",
+        "station": "shibuya",
+        "durationInYears": 3
+      },
+      "response": {
+        "areas": [
+          {
+            "id": "area-tokyo-setagaya-001",
+            "name": "東京都世田谷区（渋谷地区）",
+            "districtName": "渋谷地区",
+            "prefecture": "tokyo",
+            "city": "setagaya",
+            "station": "shibuya",
+            "coordinates": {
+              "latitude": 35.6466,
+              "longitude": 139.6554
+            },
+            "marketInfo": {
+              "averagePrice": 5200,
+              "averageUnitPrice": 80.5,
+              "transactionCount": 156
+            }
+          },
+          {
+            "id": "area-tokyo-setagaya-002",
+            "name": "東京都世田谷区（三軒茶屋地区）",
+            "districtName": "三軒茶屋地区",
+            "prefecture": "tokyo",
+            "city": "setagaya",
+            "station": "sangenjaya",
+            "coordinates": {
+              "latitude": 35.6433,
+              "longitude": 139.6693
+            },
+            "marketInfo": {
+              "averagePrice": 4850,
+              "averageUnitPrice": 75.2,
+              "transactionCount": 203
+            }
+          }
+        ]
+      }
+    },
+    "priceData": {
+      "request": {
+        "areaId": "area-tokyo-setagaya-001",
+        "duration": 3,
+        "propertyType": "mansion",
+        "propertyStatus": "new"
+      },
+      "response": {
+        "areaId": "area-tokyo-setagaya-001",
+        "areaName": "東京都世田谷区（渋谷地区）",
+        "duration": 3,
+        "chartLabels": [
+          "2022/1月",
+          "2022/4月",
+          "2022/7月",
+          "2022/10月",
+          "2023/1月",
+          "2023/4月",
+          "2023/7月",
+          "2023/10月",
+          "2024/1月",
+          "2024/4月",
+          "2024/7月",
+          "2024/10月"
+        ],
+        "priceData": [
+          4900, 5000, 5050, 5100, 5200, 5250, 5350, 5400, 5450, 5500, 5600, 5650
+        ],
+        "unitPriceData": [
+          75.5, 76.8, 77.2, 78.1, 80.0, 80.5, 82.1, 82.8, 83.5, 84.2, 85.8, 86.5
+        ]
+      }
+    },
+    "transactionHistory": {
+      "request": {
+        "areaIds": ["area-tokyo-setagaya-001", "area-tokyo-meguro-001"],
+        "propertyTypes": ["mansion"],
+        "structures": ["wood", "RC"],
+        "layouts": ["2K", "2DK", "1R_1K"],
+        "limit": 20,
+        "offset": 0
+      },
+      "response": {
+        "transactions": [
+          {
+            "id": "tx-20241025-001",
+            "date": "2024年10月",
+            "price": 6200,
+            "layout": "2LDK",
+            "structure": "木造",
+            "area": 85.5,
+            "city": "世田谷区",
+            "district": "渋谷地区",
+            "propertyType": "mansion",
+            "propertyStatus": "new",
+            "unitPrice": 72.5
+          },
+          {
+            "id": "tx-20240920-002",
+            "date": "2024年09月",
+            "price": 5500,
+            "layout": "1K",
+            "structure": "RC",
+            "area": 30.2,
+            "city": "目黒区",
+            "district": "目黒地区",
+            "propertyType": "mansion",
+            "propertyStatus": "used",
+            "unitPrice": 182.1
+          },
+          {
+            "id": "tx-20240915-003",
+            "date": "2024年09月",
+            "price": 5900,
+            "layout": "3LDK",
+            "structure": "SRC",
+            "area": 78.2,
+            "city": "世田谷区",
+            "district": "三軒茶屋地区",
+            "propertyType": "mansion",
+            "propertyStatus": "new",
+            "unitPrice": 75.4
+          },
+          {
+            "id": "tx-20240810-004",
+            "date": "2024年08月",
+            "price": 5100,
+            "layout": "4LDK",
+            "structure": "木造",
+            "area": 100.8,
+            "city": "新宿区",
+            "district": "新宿地区",
+            "propertyType": "house",
+            "propertyStatus": "new",
+            "unitPrice": 50.6
+          },
+          {
+            "id": "tx-20240725-005",
+            "date": "2024年07月",
+            "price": 4200,
+            "layout": "2DK",
+            "structure": "RC",
+            "area": 65.3,
+            "city": "目黒区",
+            "district": "目黒地区",
+            "propertyType": "mansion",
+            "propertyStatus": "used",
+            "unitPrice": 64.3
+          },
+          {
+            "id": "tx-20240720-006",
+            "date": "2024年07月",
+            "price": 5300,
+            "layout": "2K",
+            "structure": "木造",
+            "area": 55.7,
+            "city": "渋谷区",
+            "district": "渋谷地区",
+            "propertyType": "mansion",
+            "propertyStatus": "new",
+            "unitPrice": 95.1
+          },
+          {
+            "id": "tx-20240615-007",
+            "date": "2024年06月",
+            "price": 4500,
+            "layout": "3DK",
+            "structure": "SRC",
+            "area": 70.9,
+            "city": "世田谷区",
+            "district": "世田谷地区",
+            "propertyType": "mansion",
+            "propertyStatus": "used",
+            "unitPrice": 63.5
+          },
+          {
+            "id": "tx-20240510-008",
+            "date": "2024年05月",
+            "price": 5000,
+            "layout": "1LDK",
+            "structure": "RC",
+            "area": 45.2,
+            "city": "目黒区",
+            "district": "中目黒地区",
+            "propertyType": "mansion",
+            "propertyStatus": "new",
+            "unitPrice": 110.6
+          },
+          {
+            "id": "tx-20240425-009",
+            "date": "2024年04月",
+            "price": 5800,
+            "layout": "4DK",
+            "structure": "木造",
+            "area": 90.5,
+            "city": "新宿区",
+            "district": "新宿地区",
+            "propertyType": "house",
+            "propertyStatus": "new",
+            "unitPrice": 64.1
+          },
+          {
+            "id": "tx-20240320-010",
+            "date": "2024年03月",
+            "price": 4100,
+            "layout": "1K",
+            "structure": "RC",
+            "area": 35.8,
+            "city": "渋谷区",
+            "district": "原宿地区",
+            "propertyType": "mansion",
+            "propertyStatus": "used",
+            "unitPrice": 114.5
+          }
+        ],
+        "totalCount": 148,
+        "hasMore": true
+      }
+    },
+    "locations": {
+      "prefectures": {
+        "response": {
+          "prefectures": [
+            {
+              "code": "tokyo",
+              "name": "東京都",
+              "cities": [
+                {
+                  "code": "setagaya",
+                  "name": "世田谷区"
+                },
+                {
+                  "code": "meguro",
+                  "name": "目黒区"
+                },
+                {
+                  "code": "shibuya",
+                  "name": "渋谷区"
+                },
+                {
+                  "code": "shinjuku",
+                  "name": "新宿区"
+                },
+                {
+                  "code": "minato",
+                  "name": "港区"
+                }
+              ]
+            },
+            {
+              "code": "kanagawa",
+              "name": "神奈川県",
+              "cities": [
+                {
+                  "code": "yokohama",
+                  "name": "横浜市"
+                },
+                {
+                  "code": "kawasaki",
+                  "name": "川崎市"
+                },
+                {
+                  "code": "sagamihara",
+                  "name": "相模原市"
+                }
+              ]
+            },
+            {
+              "code": "osaka",
+              "name": "大阪府",
+              "cities": [
+                {
+                  "code": "osaka",
+                  "name": "大阪市"
+                },
+                {
+                  "code": "sakai",
+                  "name": "堺市"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "stations": {
+        "request": {
+          "cityCode": "setagaya"
+        },
+        "response": {
+          "stations": [
+            {
+              "code": "shibuya",
+              "name": "渋谷地区",
+              "stationType": "district"
+            },
+            {
+              "code": "sangenjaya",
+              "name": "三軒茶屋地区",
+              "stationType": "district"
+            },
+            {
+              "code": "setagaya-station",
+              "name": "世田谷駅",
+              "stationType": "station"
+            },
+            {
+              "code": "komazawa-daigaku",
+              "name": "駒澤大学駅",
+              "stationType": "station"
+            },
+            {
+              "code": "futako-tamagawa",
+              "name": "二子玉川駅",
+              "stationType": "station"
+            }
+          ]
+        }
+      }
+    },
+    "marketSummary": {
+      "response": {
+        "totalAreas": 1250,
+        "totalTransactions": 15680,
+        "averagePrice": 4850,
+        "averageUnitPrice": 78.2,
+        "priceChangeRate": 2.5,
+        "lastUpdated": "2024-10-26T10:00:00Z"
+      }
+    }
+  },
+  "errorExamples": {
+    "badRequest": {
+      "error": "Invalid request parameters",
+      "code": "INVALID_PARAMS",
+      "details": {
+        "field": "durationInYears",
+        "message": "Must be one of: 1, 3, 5, 10"
+      }
+    },
+    "notFound": {
+      "error": "Area not found",
+      "code": "AREA_NOT_FOUND",
+      "details": {
+        "areaId": "invalid-area-id"
+      }
+    },
+    "serverError": {
+      "error": "Internal server error",
+      "code": "INTERNAL_ERROR",
+      "details": {
+        "message": "Database connection failed"
+      }
+    }
+  }
+}

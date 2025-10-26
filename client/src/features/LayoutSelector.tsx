@@ -1,13 +1,13 @@
 import React from 'react';
 import { MultiSelectSelector } from '../components';
 
-interface LayoutSelectorProps {
+interface MultiLayoutSelectorProps {
   selectedLayouts?: string[];
   onLayoutsChange?: (layouts: string[]) => void;
 }
 
-const LayoutSelector: React.FC<LayoutSelectorProps> = ({
-  selectedLayouts = ['1R_1K'],
+const MultiLayoutSelector: React.FC<MultiLayoutSelectorProps> = ({
+  selectedLayouts = [],
   onLayoutsChange,
 }) => {
   const layouts = [
@@ -37,4 +37,4 @@ const LayoutSelector: React.FC<LayoutSelectorProps> = ({
   );
 };
 
-export default LayoutSelector;
+export default MultiLayoutSelector;

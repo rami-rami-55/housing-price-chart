@@ -4,7 +4,6 @@ import {
   ComparisonAreaList,
   LocationSelector,
   MultiLayoutSelector,
-  MultiPropertyStatusSelector,
   MultiPropertyTypeSelector,
   MultiStructureSelector,
   SearchButton,
@@ -19,7 +18,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const {
     // 状態
     selectedPropertyTypes,
-    selectedPropertyStatuses,
     selectedStructures,
     selectedLayouts,
     selectedPrefecture,
@@ -29,7 +27,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
     // アクション
     handlePropertyTypesChange,
-    handlePropertyStatusesChange,
     handleStructuresChange,
     handleLayoutsChange,
     handlePrefectureChange,
@@ -50,11 +47,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         <MultiPropertyTypeSelector
           selectedTypes={selectedPropertyTypes}
           onTypesChange={handlePropertyTypesChange}
-        />
-
-        <MultiPropertyStatusSelector
-          selectedStatuses={selectedPropertyStatuses}
-          onStatusesChange={handlePropertyStatusesChange}
         />
 
         <MultiStructureSelector

@@ -1,0 +1,46 @@
+# Django and DRF
+Django==4.2.5
+djangorestframework==3.16.0
+django-import-export==3.3.1
+
+# Data Analysis and GIS
+geopandas==1.1.1
+pandas==2.3.3
+numpy==2.3.4
+shapely==2.1.2
+pyproj==3.7.2
+pyogrio==0.11.1
+
+# HTTP Requests
+requests==2.30.0
+
+# Utilities
+python-dateutil==2.9.0.post0
+pytz==2025.2
+PyYAML==6.0.1
+
+# Export/Import
+openpyxl==3.1.2
+xlrd==2.0.1
+xlwt==1.3.0
+tablib==3.5.0
+odfpy==1.4.1
+et-xmlfile==1.1.0
+
+# HTML/XML Processing
+beautifulsoup4==4.12.2
+defusedxml==0.7.1
+soupsieve==2.4.1
+
+# Other Dependencies
+asgiref==3.7.2
+certifi==2023.5.7
+charset-normalizer==3.1.0
+diff-match-patch==20230430
+idna==3.4
+MarkupPy==1.14
+packaging==25.0
+six==1.17.0
+sqlparse==0.4.4
+tzdata==2025.2
+urllib3==2.0.2
