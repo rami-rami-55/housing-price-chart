@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ChartErrorBoundary from '../features/ChartErrorBoundary';
 import ChartTypeSelector from '../features/ChartTypeSelector';
 import ComparisonAreaList from '../features/ComparisonAreaList';
-import DateRangeSelector from '../features/DateRangeSelector';
+import DurationSelector from '../features/DurationSelector';
 import HamburgerMenuButton from '../features/HamburgerMenuButton';
 import LocationSelector from '../features/LocationSelector';
 import MultiLayoutSelector from '../features/MultiLayoutSelector';
@@ -16,18 +16,52 @@ import { AreaData, ChartType, ComparisonArea } from '../types/estate';
 
 const availableColors = ['red', 'green', 'yellow', 'purple', 'indigo', 'pink', 'teal'];
 
-const initialChartLabels = [
-  '2024/1月',
-  '2024/2月',
-  '2024/3月',
-  '2024/4月',
-  '2024/5月',
-  '2024/6月',
-  '2024/7月',
-  '2024/8月',
-  '2024/9月',
-  '2024/10月',
-];
+// 期間に基づいてチャートラベルを生成する関数
+const generateChartLabels = (durationInYears: number): string[] => {
+  const labels: string[] = [];
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // 1-12
+
+  // 常に10分割に固定
+  const totalPoints = 10;
+
+  // 終了日（現在）から開始日を計算
+  const endYear = currentYear;
+  const endMonth = currentMonth;
+
+  // 開始日を計算（期間を月数に変換）
+  const totalMonths = durationInYears * 12;
+  let startYear = endYear;
+  let startMonth = endMonth - totalMonths + 1;
+
+  // 年の調整
+  while (startMonth <= 0) {
+    startYear--;
+    startMonth += 12;
+  }
+
+  // 期間を10等分して均等にラベルを配置
+  for (let i = 0; i < totalPoints; i++) {
+    const progress = i / (totalPoints - 1); // 0から1の進行度
+    const monthsFromStart = Math.round(progress * (totalMonths - 1));
+
+    let targetYear = startYear;
+    let targetMonth = startMonth + monthsFromStart;
+
+    // 年の調整
+    while (targetMonth > 12) {
+      targetYear++;
+      targetMonth -= 12;
+    }
+
+    labels.push(`${targetYear}/${targetMonth}月`);
+  }
+
+  return labels;
+};
+
+const initialChartLabels = generateChartLabels(1);
 
 const initialAreas: ComparisonArea[] = [
   {
@@ -41,6 +75,7 @@ const initialAreas: ComparisonArea[] = [
     layouts: ['2K', '2DK'],
     startYear: '2023',
     endYear: '2024',
+    durationInYears: 1,
   },
   {
     id: 'area-2',
@@ -53,6 +88,7 @@ const initialAreas: ComparisonArea[] = [
     layouts: ['1R_1K'],
     startYear: '2023',
     endYear: '2024',
+    durationInYears: 1,
   },
 ];
 
@@ -93,11 +129,23 @@ const Dashboard = () => {
   const [startYear, setStartYear] = useState('2024');
   const [endYear, setEndYear] = useState('2024');
 
+  // 動的なチャートラベルの状態
+  const [chartLabels, setChartLabels] = useState<string[]>(initialChartLabels);
+
   // 複数選択用の状態
   const [selectedStructures, setSelectedStructures] = useState<string[]>(['wood']);
   const [selectedLayouts, setSelectedLayouts] = useState<string[]>(['1R_1K']);
   const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>(['mansion']);
   const [selectedPropertyStatuses, setSelectedPropertyStatuses] = useState<string[]>(['new']);
+
+  // 期間選択用の状態
+  const [selectedDuration, setSelectedDuration] = useState('1');
+
+  // 初期化時にチャートラベルを設定
+  useEffect(() => {
+    const initialLabels = generateChartLabels(parseInt(selectedDuration));
+    setChartLabels(initialLabels);
+  }, [selectedDuration]);
 
   const addArea = useCallback(() => {
     const availableAreaIds = ['area-3', 'area-4', 'area-5'];
@@ -144,6 +192,7 @@ const Dashboard = () => {
       layouts: conditions.layouts,
       startYear: startYear,
       endYear: endYear,
+      durationInYears: parseInt(selectedDuration),
     };
 
     setComparisonAreas((prev) => [...prev, newArea]);
@@ -159,6 +208,7 @@ const Dashboard = () => {
     selectedLayouts,
     startYear,
     endYear,
+    selectedDuration,
   ]);
 
   const removeArea = useCallback((areaId: string) => {
@@ -246,6 +296,43 @@ const Dashboard = () => {
     console.log('Selected property statuses:', statuses);
   };
 
+  const handleDurationChange = (duration: string) => {
+    setSelectedDuration(duration);
+    console.log('Selected duration:', duration);
+
+    // チャートラベルを新しい期間に基づいて更新
+    const newChartLabels = generateChartLabels(parseInt(duration));
+    setChartLabels(newChartLabels);
+    console.log('Updated chart labels:', newChartLabels);
+
+    // 期間変更時に全ての比較エリアの期間表示を更新
+    const updatedAreas = comparisonAreas.map((area) => ({
+      ...area,
+      durationInYears: parseInt(duration),
+    }));
+    console.log('Updated areas with new duration:', updatedAreas);
+    setComparisonAreas(updatedAreas);
+  };
+
+  // 期間選択に基づいて期間文字列を生成するヘルパー関数
+  const getDurationText = (durationInYears: number): string => {
+    const durationOptions: Record<number, string> = {
+      1: '直近1年',
+      3: '直近3年',
+      5: '直近5年',
+      10: '直近10年',
+    };
+    return durationOptions[durationInYears] || `直近${durationInYears}年`;
+  };
+
+  // 現在の年から期間に基づいて開始年・終了年を計算
+  const getYearRange = (durationInYears: number): { startYear: number; endYear: number } => {
+    const currentYear = new Date().getFullYear();
+    const endYear = currentYear;
+    const startYear = currentYear - durationInYears + 1;
+    return { startYear, endYear };
+  };
+
   // 色の取得関数
   const getColorHex = (colorName: string): string => {
     const colors: Record<string, string> = {
@@ -302,13 +389,6 @@ const Dashboard = () => {
             onStationChange={handleStationChange}
           />
 
-          <DateRangeSelector
-            startYear={startYear}
-            endYear={endYear}
-            onStartYearChange={handleStartYearChange}
-            onEndYearChange={handleEndYearChange}
-          />
-
           <SearchButton onSearch={handleSearch} />
 
           <ComparisonAreaList
@@ -316,6 +396,8 @@ const Dashboard = () => {
             onToggleAreaSelection={toggleAreaSelection}
             onRemoveArea={removeArea}
             getColorHex={getColorHex}
+            getDurationText={getDurationText}
+            getYearRange={getYearRange}
           />
         </div>
       </div>
@@ -327,6 +409,14 @@ const Dashboard = () => {
       <main className="main-content flex-1 p-6 flex flex-col min-w-0 bg-gray-100">
         <h2 className="text-3xl font-bold text-gray-800 mb-4">分析グラフ</h2>
 
+        {/* 期間選択（右上に配置） */}
+        <div className="mb-4">
+          <DurationSelector
+            selectedDuration={selectedDuration}
+            onDurationChange={handleDurationChange}
+          />
+        </div>
+
         {/* グラフ切り替えタブ */}
         <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
 
@@ -336,7 +426,7 @@ const Dashboard = () => {
             chartType={chartType}
             comparisonAreas={comparisonAreas}
             areaMasterData={areaMasterData}
-            chartLabels={initialChartLabels}
+            chartLabels={chartLabels}
           />
         </ChartErrorBoundary>
       </main>

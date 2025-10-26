@@ -6,6 +6,8 @@ interface ComparisonAreaListProps {
   onToggleAreaSelection: (areaId: string) => void;
   onRemoveArea: (areaId: string) => void;
   getColorHex: (colorName: string) => string;
+  getDurationText?: (durationInYears: number) => string;
+  getYearRange?: (durationInYears: number) => { startYear: number; endYear: number };
 }
 
 const ComparisonAreaList: React.FC<ComparisonAreaListProps> = ({
@@ -13,6 +15,8 @@ const ComparisonAreaList: React.FC<ComparisonAreaListProps> = ({
   onToggleAreaSelection,
   onRemoveArea,
   getColorHex,
+  getDurationText,
+  getYearRange,
 }) => {
   const formatConditionText = (area: ComparisonArea) => {
     const conditions = [];
@@ -28,10 +32,26 @@ const ComparisonAreaList: React.FC<ComparisonAreaListProps> = ({
   };
 
   const formatDuration = (area: ComparisonArea) => {
+    // デバッグ用
+    console.log(
+      'formatDuration called for area:',
+      area.id,
+      'durationInYears:',
+      area.durationInYears
+    );
+
+    // 新しい期間システムを優先
+    if (area.durationInYears && getDurationText) {
+      return `(集計期間: ${getDurationText(area.durationInYears)})`;
+    }
+
+    // 従来の年範囲システムをフォールバック
     if (area.startYear && area.endYear) {
       return `(${area.startYear}年〜${area.endYear}年)`;
     }
-    return '';
+
+    // デフォルト表示
+    return '(集計期間: 直近1年)';
   };
 
   return (

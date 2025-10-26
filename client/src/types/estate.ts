@@ -9,6 +9,7 @@ export type ComparisonArea = {
   layouts?: string[];
   startYear?: string;
   endYear?: string;
+  durationInYears?: number;
 };
 
 export type AreaData = {
