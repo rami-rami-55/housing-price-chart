@@ -1,51 +1,18 @@
-import React, { useCallback, useState } from 'react';
-import RealEstatePriceChart from '../components/features/RealEstatePriceChart';
+import { useCallback, useState } from 'react';
+import ChartErrorBoundary from '../features/ChartErrorBoundary';
+import ChartTypeSelector from '../features/ChartTypeSelector';
+import ComparisonAreaList from '../features/ComparisonAreaList';
+import DateRangeSelector from '../features/DateRangeSelector';
+import HamburgerMenuButton from '../features/HamburgerMenuButton';
+import LocationSelector from '../features/LocationSelector';
+import MultiLayoutSelector from '../features/MultiLayoutSelector';
+import MultiPropertyStatusSelector from '../features/MultiPropertyStatusSelector';
+import MultiPropertyTypeSelector from '../features/MultiPropertyTypeSelector';
+import MultiStructureSelector from '../features/MultiStructureSelector';
+import RealEstatePriceChart from '../features/RealEstatePriceChart';
+import SearchButton from '../features/SearchButton';
+import SidebarHeader from '../features/SidebarHeader';
 import { AreaData, ChartType, ComparisonArea } from '../types/estate';
-
-// エラーバウンダリコンポーネント
-class ChartErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Chart Error:', error);
-    console.error('Error Info:', errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex-1 bg-white p-6 rounded-xl shadow-2xl min-h-0 flex items-center justify-center">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-red-600 mb-2">
-              チャートの読み込みに失敗しました
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {this.state.error?.message || 'Unknown error occurred'}
-            </p>
-            <button
-              onClick={() => this.setState({ hasError: false, error: undefined })}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              再試行
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
 
 const availableColors = ['red', 'green', 'yellow', 'purple', 'indigo', 'pink', 'teal'];
 
@@ -94,6 +61,21 @@ const Dashboard = () => {
   const [chartType, setChartType] = useState<ChartType>('price');
   const [comparisonAreas, setComparisonAreas] = useState<ComparisonArea[]>(initialAreas);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedStructure, setSelectedStructure] = useState('wood');
+  const [selectedPropertyStatus, setSelectedPropertyStatus] = useState('new');
+  const [selectedPropertyType, setSelectedPropertyType] = useState('mansion');
+  const [selectedPrefecture, setSelectedPrefecture] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedStation, setSelectedStation] = useState('');
+  const [selectedLayout, setSelectedLayout] = useState('1R_1K');
+  const [startYear, setStartYear] = useState('2024');
+  const [endYear, setEndYear] = useState('2024');
+
+  // 複数選択用の状態
+  const [selectedStructures, setSelectedStructures] = useState<string[]>(['wood']);
+  const [selectedLayouts, setSelectedLayouts] = useState<string[]>(['1R_1K']);
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>(['mansion']);
+  const [selectedPropertyStatuses, setSelectedPropertyStatuses] = useState<string[]>(['new']);
 
   const addArea = useCallback(() => {
     const availableAreaIds = ['area-3', 'area-4', 'area-5'];
@@ -137,6 +119,77 @@ const Dashboard = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleStructureChange = (structure: string) => {
+    setSelectedStructure(structure);
+    console.log('Selected structure:', structure);
+  };
+
+  const handlePropertyStatusChange = (status: string) => {
+    setSelectedPropertyStatus(status);
+    console.log('Selected property status:', status);
+  };
+
+  const handlePropertyTypeChange = (type: string) => {
+    setSelectedPropertyType(type);
+    console.log('Selected property type:', type);
+  };
+
+  const handlePrefectureChange = (prefecture: string) => {
+    setSelectedPrefecture(prefecture);
+    console.log('Selected prefecture:', prefecture);
+  };
+
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
+    console.log('Selected city:', city);
+  };
+
+  const handleStationChange = (station: string) => {
+    setSelectedStation(station);
+    console.log('Selected station:', station);
+  };
+
+  const handleLayoutChange = (layout: string) => {
+    setSelectedLayout(layout);
+    console.log('Selected layout:', layout);
+  };
+
+  const handleStartYearChange = (year: string) => {
+    setStartYear(year);
+    console.log('Selected start year:', year);
+  };
+
+  const handleEndYearChange = (year: string) => {
+    setEndYear(year);
+    console.log('Selected end year:', year);
+  };
+
+  const handleSearch = () => {
+    console.log('Search button clicked');
+    // 実際の検索ロジックをここに実装
+  };
+
+  // 複数選択用のハンドラー
+  const handleStructuresChange = (structures: string[]) => {
+    setSelectedStructures(structures);
+    console.log('Selected structures:', structures);
+  };
+
+  const handleLayoutsChange = (layouts: string[]) => {
+    setSelectedLayouts(layouts);
+    console.log('Selected layouts:', layouts);
+  };
+
+  const handlePropertyTypesChange = (types: string[]) => {
+    setSelectedPropertyTypes(types);
+    console.log('Selected property types:', types);
+  };
+
+  const handlePropertyStatusesChange = (statuses: string[]) => {
+    setSelectedPropertyStatuses(statuses);
+    console.log('Selected property statuses:', statuses);
+  };
+
   // 色の取得関数
   const getColorHex = (colorName: string): string => {
     const colors: Record<string, string> = {
@@ -159,210 +212,67 @@ const Dashboard = () => {
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">不動産価格比較サイト</h1>
-        <div className="mt-8 pt-6 border-t border-gray-200" />
+        <SidebarHeader />
 
         <div className="space-y-6">
-          {/* 物件の種類 */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">物件の種類</h2>
-            <div className="grid grid-cols-1 gap-2">
-              <button className="px-4 py-2 text-left bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                マンション
-              </button>
-              <button className="px-4 py-2 text-left bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                戸建て
-              </button>
-              <button className="px-4 py-2 text-left bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                土地
-              </button>
-            </div>
+          <MultiPropertyTypeSelector
+            selectedTypes={selectedPropertyTypes}
+            onTypesChange={handlePropertyTypesChange}
+          />
+
+          <MultiPropertyStatusSelector
+            selectedStatuses={selectedPropertyStatuses}
+            onStatusesChange={handlePropertyStatusesChange}
+          />
+
+          <MultiStructureSelector
+            selectedStructures={selectedStructures}
+            onStructuresChange={handleStructuresChange}
+          />
+
+          <div className="mt-4">
+            <MultiLayoutSelector
+              selectedLayouts={selectedLayouts}
+              onLayoutsChange={handleLayoutsChange}
+            />
           </div>
 
-          <div className="space-y-6">
-            {/* 中古、新品 */}
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">物件の状態</h2>
-            <div className="grid grid-cols-2 gap-2">
-              <button className="px-3 py-2 text-center bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                新品
-              </button>
-              <button className="px-3 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                中古
-              </button>
-            </div>
-          </div>
+          <LocationSelector
+            selectedPrefecture={selectedPrefecture}
+            selectedCity={selectedCity}
+            selectedStation={selectedStation}
+            onPrefectureChange={handlePrefectureChange}
+            onCityChange={handleCityChange}
+            onStationChange={handleStationChange}
+          />
 
-          {/* 地域選択 */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">地域</h2>
-            <div className="space-y-2">
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>都道府県を選択</option>
-                <option>東京都</option>
-                <option>神奈川県</option>
-                <option>大阪府</option>
-              </select>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>市区町村を選択</option>
-                <option>世田谷区</option>
-                <option>渋谷区</option>
-                <option>新宿区</option>
-              </select>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>最寄り駅を選択</option>
-                <option>渋谷駅</option>
-                <option>新宿駅</option>
-                <option>池袋駅</option>
-              </select>
-            </div>
-          </div>
+          <DateRangeSelector
+            startYear={startYear}
+            endYear={endYear}
+            onStartYearChange={handleStartYearChange}
+            onEndYearChange={handleEndYearChange}
+          />
 
-          {/* レイアウト */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">レイアウト</h2>
-            <div className="grid grid-cols-3 gap-2">
-              <button className="px-2 py-2 text-center bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
-                1R / 1K
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                1DK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                1LDK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                2K
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                2DK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                2LDK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                3K
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                3DK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                3LDK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                4K
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                4DK
-              </button>
-              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
-                4LDK
-              </button>
-            </div>
-          </div>
+          <SearchButton onSearch={handleSearch} />
 
-          {/* 検索ボタン */}
-          <div className="space-y-3">
-            <button className="w-full px-6 py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-600 transition">
-              条件を適用
-            </button>
-          </div>
-
-          {/* 比較エリア一覧 */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">比較エリア一覧</h2>
-            <p className="text-sm text-gray-500 mb-3">クリックでグラフ表示をON/OFF</p>
-            <div className="space-y-3">
-              {comparisonAreas.map((area) => (
-                <div
-                  key={area.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border-2 transition cursor-pointer ${
-                    area.selected
-                      ? 'border-blue-400 bg-blue-50'
-                      : 'border-gray-200 bg-gray-50 opacity-60'
-                  }`}
-                  onClick={() => toggleAreaSelection(area.id)}
-                >
-                  <div className="flex items-center">
-                    <div
-                      className="w-3 h-3 rounded-full mr-3"
-                      style={{
-                        backgroundColor: getColorHex(area.color),
-                        border: `1px solid ${getColorHex(area.color)}`,
-                      }}
-                    />
-                    <span className="font-medium text-gray-700 truncate">{area.name}</span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeArea(area.id);
-                    }}
-                    className="text-red-500 hover:text-red-700 ml-2"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ComparisonAreaList
+            comparisonAreas={comparisonAreas}
+            onToggleAreaSelection={toggleAreaSelection}
+            onRemoveArea={removeArea}
+            getColorHex={getColorHex}
+          />
         </div>
       </div>
 
       {/* ハンバーガーメニューボタン（モバイル用） */}
-      <button
-        onClick={toggleSidebar}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg"
-      >
-        {isSidebarOpen ? (
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        )}
-      </button>
+      <HamburgerMenuButton isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
 
       {/* メインコンテンツ */}
       <main className="main-content flex-1 p-6 flex flex-col min-w-0 bg-gray-100">
         <h2 className="text-3xl font-bold text-gray-800 mb-4">分析グラフ</h2>
 
         {/* グラフ切り替えタブ */}
-        <div className="flex space-x-4 mb-4">
-          <button
-            onClick={() => setChartType('price')}
-            className={`px-6 py-2 font-semibold rounded-xl shadow-md transition ${
-              chartType === 'price'
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-white text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            取引価格の時系列推移
-          </button>
-          <button
-            onClick={() => setChartType('unit_price')}
-            className={`px-6 py-2 font-semibold rounded-xl shadow-md transition ${
-              chartType === 'unit_price'
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-white text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            単価の時系列推移
-          </button>
-        </div>
+        <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
 
         {/* グラフコンポーネント */}
         <ChartErrorBoundary>

@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import React, { useEffect, useRef } from 'react';
-import { AreaData, ChartType, ComparisonArea } from '../../types/estate';
+import { AreaData, ChartType, ComparisonArea } from '../types/estate';
 
 // Chart.jsのコンポーネントを登録
 ChartJS.register(
