@@ -166,7 +166,7 @@ const RealEstatePriceChart: React.FC<RealEstatePriceChartProps> = ({
   }, [chartType, comparisonAreas, areaMasterData, chartLabels]);
 
   return (
-    <div className="flex-1 bg-white p-6 rounded-xl shadow-2xl min-h-0" style={{ height: '400px' }}>
+    <div className="w-full h-full bg-white p-6 rounded-xl shadow-2xl">
       <canvas ref={chartRef} style={{ width: '100%', height: '100%' }}></canvas>
     </div>
   );

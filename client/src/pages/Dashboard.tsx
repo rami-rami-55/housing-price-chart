@@ -13,7 +13,9 @@ const DashboardContent: React.FC = () => {
         } md:translate-x-0`}
       />
       <HamburgerMenuButton isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
-      <MainBoard />
+      <div className="flex-1 h-full overflow-hidden">
+        <MainBoard />
+      </div>
     </div>
   );
 };

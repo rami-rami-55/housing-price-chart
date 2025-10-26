@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不動産価格分析ダッシュボード</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js 3.x を使用 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            /* bodyのoverflow: hidden; を削除し、横スクロールのみ抑制 */
+            overflow-x: hidden; 
+        }
+        .sidebar {
+            /* 左側の条件パネルはスクロール可能 */
+            overflow-y: auto;
+        }
+        .main-content {
+            /* 右側のグラフエリア全体のスクロールを許可 */
+            overflow-y: auto; 
+        }
+        .toggle-btn {
+            z-index: 50;
+        }
+        #chartContainer {
+            position: relative;
+            width: 100%;
+            padding: 1rem;
+            /* タブコンテンツとして機能 */
+        }
+        /* 取引履歴エリア全体 (historyWrapper) */
+        #historyWrapper {
+            width: 100%;
+            /* グラフコンテナと同じmin-heightを適用して切り替え時に高さが急変するのを防ぐ */
+        }
+        /* エリアごとのテーブルのコンテナ内でスクロールを制御 */
+        .area-history-scroll {
+            max-height: 45vh; /* 画面の高さに応じて調整 */
+            overflow-y: auto;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        /* テーブルヘッダーの固定 */
+        .area-history-scroll table th {
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tailwind CSS設定 (Interフォントと角丸を適用) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    borderRadius: {
+                        'xl': '1rem',
+                    },
+                    colors: {
+                        'red': { 500: '#ef4444', 600: '#dc2626' },
+                        'green': { 500: '#10b981', 600: '#059669' },
+                        'yellow': { 500: '#f59e0b', 600: '#d97706' },
+                        'purple': { 500: '#a855f7', 600: '#9333ea' },
+                        'indigo': { 500: '#6366f1', 600: '#4f46e5' },
+                        'pink': { 500: '#ec4899', 600: '#db2777' },
+                        'teal': { 500: '#14b8a6', 600: '#0d9488' },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- メインレイアウト: 左サイドバー (条件) と 右メインエリア (グラフ) -->
+    <div class="flex h-screen bg-gray-50">
+
+        <!-- 1. 左サイドバー (条件設定) -->
+        <div id="sidebar" class="sidebar w-full md:w-80 bg-white p-6 shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 absolute md:relative z-40 h-full -translate-x-full md:translate-x-0">
+            <h1 class="2xl font-bold text-gray-800 mb-6">不動産価格比較サイト</h1>
+            
+            <div class="space-y-6">
+                
+                <!-- 物件の種類 -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">物件の種類</h2>
+                    <div id="property-type-buttons" class="flex flex-wrap gap-2">
+                        <button class="px-3 py-1 text-sm bg-blue-500 text-white rounded-full transition hover:bg-blue-600" data-value="戸建て">新築戸建て住宅</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full transition hover:bg-gray-300" data-value="中古戸建て">中古戸建て住宅</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full transition hover:bg-gray-300" data-value="新築マンション">新築マンション</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full transition hover:bg-gray-300" data-value="中古マンション">中古マンション</button>
+                    </div>
+                </div>
+
+                <!-- 構造の追加 -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">構造</h2>
+                    <div id="structure-buttons" class="flex flex-wrap gap-2">
+                        <button class="px-3 py-1 text-sm bg-blue-500 text-white rounded-full transition hover:bg-blue-600" data-value="木造">木造</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full transition hover:bg-gray-300" data-value="RC">RC</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full transition hover:bg-gray-300" data-value="SRC">SRC</button>
+                    </div>
+                </div>
+
+                <!-- 間取り -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">間取り</h2>
+                    <div id="layout-buttons" class="flex flex-wrap gap-2">
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl transition hover:bg-gray-300" data-value="1K">1K</button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl transition hover:bg-gray-300" data-value="1DK">1DK</button>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-xl transition hover:bg-blue-600" data-value="2K">2K</button>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-xl transition hover:bg-blue-600" data-value="2DK">2DK</button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl transition hover:bg-gray-300" data-value="3LDK">3LDK</button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl transition hover:bg-gray-300" data-value="4LDK+">4LDK+</button>
+                    </div>
+                </div>
+
+                <!-- 地域選択 -->
+                <div class="space-y-3">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">地域</h2>
+                    <select id="select-prefecture" class="w-full p-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="">都道府県を選択</option>
+                        <option value="tokyo">東京都</option>
+                        <option value="kanagawa">神奈川県</option>
+                    </select>
+                    <select id="select-city" class="w-full p-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="">市区町村を選択</option>
+                        <option value="setagaya">世田谷区</option>
+                        <option value="meguro">目黒区</option>
+                    </select>
+                    <!-- 「最寄り駅を選択」を「DistrictName（地区名）を選択」に変更 -->
+                    <select id="select-district" class="w-full p-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="">地区名 (DistrictName) を選択</option>
+                        <option value="shibuya">渋谷地区</option>
+                        <option value="shinjuku">新宿地区</option>
+                    </select>
+                </div>
+                
+                <!-- 条件を適用ボタン (比較エリアの追加を実行) - 地域選択の直下へ移動 -->
+                <button id="apply-condition-btn" class="w-full py-3 mt-4 mb-6 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition">
+                    条件を適用
+                </button>
+
+                <!-- 比較エリア一覧 (動的) -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">比較エリア一覧</h2>
+                    <p class="text-sm text-gray-500 mb-3">クリックでグラフ表示をON/OFF</p>
+                    <!-- 動的に追加・管理されるエリアのコンテナ -->
+                    <div id="comparison-areas" class="space-y-3">
+                        <!-- Area items will be inserted here by JavaScript -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- モバイル用サイドバートグルボタン -->
+        <button id="menu-toggle" class="md:hidden toggle-btn fixed top-4 left-4 p-3 bg-blue-600 text-white rounded-full shadow-lg">
+            <svg id="open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+
+        <!-- 2. 右メインエリア (グラフ表示) -->
+        <main class="main-content flex-1 p-6 flex flex-col min-w-0 bg-gray-100"
+
+            <!-- タブ切り替えと期間選択を同じ行に配置 -->
+            <div class="flex items-center justify-between mb-4 flex-wrap">
+                <!-- タブグループ (左側) -->
+                <div class="flex space-x-2 sm:space-x-4 mb-2 sm:mb-0">
+                    <!-- グラフのタブ -->
+                    <button id="tab-chart" class="main-tab px-4 sm:px-6 py-2 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600">
+                        グラフ
+                    </button>
+                    <!-- 取引履歴のタブ -->
+                    <button id="tab-history" class="main-tab px-4 sm:px-6 py-2 bg-white text-gray-700 font-semibold rounded-xl shadow-md transition hover:bg-gray-200">
+                        取引履歴
+                    </button>
+                </div>
+                
+                <!-- 期間選択 (右側) -->
+                <div class="flex items-center">
+                    <label for="select-duration" class="text-gray-700 font-semibold mr-4 whitespace-nowrap text-sm sm:text-base">集計期間:</label>
+                    <select id="select-duration" class="p-2 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm min-w-[120px]">
+                        <option value="1">直近1年</option>
+                        <option value="3">直近3年</option>
+                        <option value="5">直近5年</option>
+                        <option value="10">直近10年</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- タブコンテンツエリア -->
+            <div id="tabContent" class="flex-1 min-h-[400px]">
+                
+                <!-- グラフコンテンツ -->
+                <div id="chartView" class="w-full h-full bg-white p-6 rounded-xl shadow-2xl flex flex-col">
+                    <!-- グラフサブタブ -->
+                    <div class="flex space-x-4 mb-4">
+                        <button id="btn-price-distribution" class="chart-tab px-4 py-1 text-sm bg-blue-500 text-white font-semibold rounded-lg transition hover:bg-blue-600">
+                            取引価格の時系列推移
+                        </button>
+                        <button id="btn-unit-price-distribution" class="chart-tab px-4 py-1 text-sm bg-white text-gray-700 font-semibold rounded-lg transition hover:bg-gray-200">
+                            単価の時系列推移
+                        </button>
+                    </div>
+                    <!-- グラフコンテナ -->
+                    <div id="chartContainer" class="flex-1 relative min-h-[250px]">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 取引履歴コンテンツ -->
+                <div id="historyView" class="hidden w-full h-full">
+                    <div id="historyContainer" class="space-y-6">
+                        <!-- エリアごとのテーブルはここに動的に挿入される -->
+                    </div>
+                </div>
+                
+            </div>
+            
+        </main>
+    </div>
+
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        const chartElement = document.getElementById('myChart');
+        const comparisonAreasContainer = document.getElementById('comparison-areas');
+        const propertyTypeButtons = document.getElementById('property-type-buttons');
+        const structureButtons = document.getElementById('structure-buttons');
+        const layoutButtons = document.getElementById('layout-buttons');
+        const applyConditionBtn = document.getElementById('apply-condition-btn');
+        const durationSelect = document.getElementById('select-duration');
+        const districtSelect = document.getElementById('select-district');
+
+        // タブ切り替え要素
+        const tabChartBtn = document.getElementById('tab-chart');
+        const tabHistoryBtn = document.getElementById('tab-history');
+        const chartView = document.getElementById('chartView');
+        const historyView = document.getElementById('historyView');
+        const chartTabs = document.querySelectorAll('.chart-tab');
+        
+        // 取引履歴の要素
+        const historyContainer = document.getElementById('historyContainer');
+
+        let myChart;
+        let currentChartType = 'price'; // 'price' or 'unit_price'
+        let currentView = 'chart'; // 'chart' or 'history'
+
+
+        // 比較エリアのデータ（現在の状態とグラフデータ）
+        let comparisonAreas = [
+            { id: 'area-1', name: '東京都世田谷区', districtName: '世田谷区', color: 'red', selected: true, type: '新築戸建て住宅', structure: '木造', layouts: ['2K', '2DK'], durationInYears: 1 },
+            { id: 'area-2', name: '神奈川県目黒区', districtName: '目黒区', color: 'green', selected: true, type: '中古マンション', structure: 'RC', layouts: ['1K'], durationInYears: 3 },
+        ];
+        let nextAreaId = 3;
+
+        // グラフ描画用のマスターデータ（時系列データに更新）
+        const masterTimeSeriesData = [
+            { label: '2020/1月', price: 4000, unitPrice: 60, area: 'area-1' },
+            { label: '2021/1月', price: 4500, unitPrice: 68, area: 'area-1' },
+            { label: '2022/1月', price: 4900, unitPrice: 75, area: 'area-1' },
+            { label: '2023/1月', price: 5200, unitPrice: 80, area: 'area-1' },
+            { label: '2023/4月', price: 5300, unitPrice: 82, area: 'area-1' },
+            { label: '2023/7月', price: 5380, unitPrice: 83, area: 'area-1' },
+            { label: '2023/10月', price: 5500, unitPrice: 87, area: 'area-1' }, 
+            { label: '2024/1月', price: 5600, unitPrice: 88, area: 'area-1' }, 
+            { label: '2024/4月', price: 5700, unitPrice: 89, area: 'area-1' }, 
+            { label: '2024/7月', price: 5800, unitPrice: 90, area: 'area-1' }, 
+            { label: '2024/10月', price: 5900, unitPrice: 92, area: 'area-1' }, 
+
+            { label: '2020/1月', price: 3500, unitPrice: 50, area: 'area-2' },
+            { label: '2021/1月', price: 3800, unitPrice: 55, area: 'area-2' },
+            { label: '2022/1月', price: 4100, unitPrice: 60, area: 'area-2' },
+            { label: '2023/1月', price: 4400, unitPrice: 65, area: 'area-2' },
+            { label: '2023/4月', price: 4500, unitPrice: 67, area: 'area-2' },
+            { label: '2023/7月', price: 4600, unitPrice: 68, area: 'area-2' },
+            { label: '2023/10月', price: 4700, unitPrice: 70, area: 'area-2' },
+            { label: '2024/1月', price: 4800, unitPrice: 72, area: 'area-2' },
+            { label: '2024/4月', price: 4900, unitPrice: 74, area: 'area-2' },
+            { label: '2024/7月', price: 5000, unitPrice: 75, area: 'area-2' },
+            { label: '2024/10月', price: 5100, unitPrice: 77, area: 'area-2' },
+        ];
+
+        // 直近の取引履歴用ダミーデータ (DistrictNameでフィルタリングするため、DistrictNameに近い情報を持つフィールドを使用)
+        const recentHistoryData = [
+            { date: '2024年10月', price: 6200, layout: '2LDK', structure: '木造', area: 85, city: '世田谷区', district: '世田谷区' },
+            { date: '2024年09月', price: 5500, layout: '1K', structure: 'RC', area: 30, city: '目黒区', district: '目黒区' },
+            { date: '2024年09月', price: 5900, layout: '3LDK', structure: 'SRC', area: 78, city: '世田谷区', district: '世田谷区' },
+            { date: '2024年08月', price: 5100, layout: '4LDK+', structure: '木造', area: 100, city: '新宿区', district: '新宿地区' },
+            { date: '2024年07月', price: 4200, layout: '2DK', structure: 'RC', area: 65, city: '目黒区', district: '目黒区' },
+            { date: '2024年07月', price: 5300, layout: '2K', structure: '木造', area: 55, city: '渋谷区', district: '渋谷地区' },
+            { date: '2024年06月', price: 4500, layout: '3DK', structure: 'SRC', area: 70, city: '世田谷区', district: '世田谷区' },
+            { date: '2024年05月', price: 5000, layout: '1LDK', structure: 'RC', area: 45, city: '目黒区', district: '目黒区' },
+            { date: '2024年04月', price: 5800, layout: '4DK', structure: '木造', area: 90, city: '新宿区', district: '新宿地区' },
+            { date: '2024年03月', price: 4100, layout: '1K', structure: 'RC', area: 35, city: '渋谷区', district: '渋谷地区' },
+            { date: '2024年02月', price: 4700, layout: '2LDK', structure: 'SRC', area: 60, city: '世田谷区', district: '世田谷区' },
+            { date: '2024年01月', price: 5200, layout: '3LDK', structure: '木造', area: 80, city: '目黒区', district: '目黒区' },
+            { date: '2023年12月', price: 4300, layout: '2DK', structure: 'RC', area: 50, city: '渋谷区', district: '渋谷地区' },
+            { date: '2023年11月', price: 5600, layout: '4LDK+', structure: '木造', area: 110, city: '新宿区', district: '新宿地区' },
+        ];
+
+        const availableColors = ['red', 'green', 'yellow', 'purple', 'indigo', 'pink', 'teal'];
+
+        // Tailwindの色定義からHEXコードを取得する関数
+        const getColorHex = (colorName) => {
+            const colors = tailwind.config.theme.extend.colors;
+            return colors[colorName] ? colors[colorName]['500'] : '#3b82f6'; 
+        };
+
+        // 現在選択されている条件を取得するヘルパー関数
+        const getCurrentConditions = () => {
+            const selectedType = propertyTypeButtons.querySelector('.bg-blue-500')?.textContent.trim() || '';
+            const selectedStructure = structureButtons.querySelector('.bg-blue-500')?.textContent.trim() || '';
+            const selectedLayouts = Array.from(layoutButtons.querySelectorAll('.bg-blue-500'))
+                                        .map(btn => btn.textContent.trim());
+            
+            return {
+                type: selectedType,
+                structure: selectedStructure,
+                layouts: selectedLayouts
+            };
+        };
+
+        // 条件ボタンのクリックイベントを設定
+        const setupConditionListeners = () => {
+            const toggleButtonSelection = (container, event) => {
+                // シングル選択 (物件の種類, 構造)
+                if (container.id === 'property-type-buttons' || container.id === 'structure-buttons') {
+                    container.querySelectorAll('button').forEach(btn => {
+                        if (btn === event.target) {
+                            btn.classList.replace('bg-gray-200', 'bg-blue-500');
+                            btn.classList.replace('text-gray-700', 'text-white');
+                            btn.classList.replace('hover:bg-gray-300', 'hover:bg-blue-600');
+                        } else {
+                            btn.classList.replace('bg-blue-500', 'bg-gray-200');
+                            btn.classList.replace('text-white', 'text-gray-700');
+                            btn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-300');
+                        }
+                    });
+                } 
+                // マルチ選択 (間取り)
+                else if (container.id === 'layout-buttons') {
+                    if (event.target.classList.contains('bg-blue-500')) {
+                        event.target.classList.replace('bg-blue-500', 'bg-gray-200');
+                        event.target.classList.replace('text-white', 'text-gray-700');
+                        event.target.classList.replace('hover:bg-blue-600', 'hover:bg-gray-300');
+                    } else {
+                        event.target.classList.replace('bg-gray-200', 'bg-blue-500');
+                        event.target.classList.replace('text-gray-700', 'text-white');
+                        event.target.classList.replace('hover:bg-gray-300', 'hover:bg-blue-600');
+                    }
+                }
+            };
+
+            propertyTypeButtons.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') toggleButtonSelection(propertyTypeButtons, e);
+            });
+            structureButtons.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') toggleButtonSelection(structureButtons, e);
+            });
+            layoutButtons.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') toggleButtonSelection(layoutButtons, e);
+            });
+        };
+
+        // 集計期間に基づきデータをフィルタリングする関数
+        const filterDataByDuration = (data, durationInYears) => {
+            const currentYear = new Date().getFullYear();
+            const startYear = currentYear - durationInYears + 1; // 期間の開始年 (例: 2024 - 3 + 1 = 2022)
+            
+            const startDate = new Date(startYear, 0, 1);
+            const endDate = new Date(currentYear + 1, 0, 1); // 終了年の翌年1月1日まで
+
+            const filteredData = data.filter(item => {
+                // ラベル 'YYYY/MM月' を Date オブジェクトに変換
+                const [year, month] = item.label.replace('月', '').split('/').map(Number);
+                const itemDate = new Date(year, month - 1, 1);
+                
+                // 期間内にあるかチェック
+                return itemDate >= startDate && itemDate < endDate;
+            });
+            return filteredData;
+        };
+
+        // Chart.js インスタンスの初期化と更新
+        const renderChart = () => {
+            // 隠しセレクトボックスから現在の期間値を取得
+            const durationInYears = parseInt(durationSelect.value); 
+            
+            // 期間に基づいてデータセットを準備
+            const filteredTimeSeries = filterDataByDuration(masterTimeSeriesData, durationInYears);
+            
+            // グラフのラベルを抽出 (重複なし)
+            const chartLabels = [...new Set(filteredTimeSeries.map(item => item.label))].sort();
+
+            // 選択されているエリアのデータセットを構築
+            const isPrice = currentChartType === 'price';
+            const titleText = isPrice ? '取引価格の時系列推移 (万円)' : '取引単価の時系列推移 (万円/㎡)';
+            const yAxisLabel = isPrice ? '平均取引価格 (万円)' : '平均取引単価 (万円/㎡)';
+
+            const datasets = comparisonAreas
+                .filter(area => area.selected)
+                .map(area => {
+                    const areaData = filteredTimeSeries.filter(item => item.area === area.id);
+                    // ラベル順にデータを並べ替えて、欠損値はnullで埋める
+                    const dataset = chartLabels.map(label => {
+                        const item = areaData.find(d => d.label === label);
+                        return item ? (isPrice ? item.price : item.unitPrice) : null;
+                    });
+                    
+                    const colorHex = getColorHex(area.color);
+
+                    return {
+                        label: area.name,
+                        data: dataset,
+                        borderColor: colorHex,
+                        backgroundColor: colorHex + '33', // 1/5 transparent background
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: colorHex,
+                        tension: 0.4, // スムーズな線
+                        fill: false
+                    };
+                });
+
+            // 既存のグラフがあれば破棄
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // Chart.jsの初期化
+            if (window.Chart) {
+                myChart = new Chart(chartElement, {
+                    type: 'line', // 線グラフに変更
+                    data: {
+                        labels: chartLabels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: titleText,
+                                font: { size: 18 },
+                                color: '#1f2937'
+                            },
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toLocaleString() + (isPrice ? '万円' : '万円/㎡');
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: yAxisLabel,
+                                    color: '#4b5563'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '年月',
+                                    color: '#4b5563'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // 比較エリア一覧のUIを更新する
+        const updateAreaListUI = () => {
+            comparisonAreasContainer.innerHTML = ''; // 一旦クリア
+            
+            // 現在選択されている期間のテキストを取得
+            const selectedOption = durationSelect.options[durationSelect.selectedIndex];
+            const durationText = selectedOption ? selectedOption.textContent : '直近1年';
+            const durationDisplay = `(集計期間: ${durationText})`;
+
+            comparisonAreas.forEach(area => {
+                const element = document.createElement('div');
+                const isSelected = area.selected;
+                const baseClasses = "flex items-center justify-between p-3 rounded-xl shadow-sm transition cursor-pointer";
+                const selectedClasses = "bg-blue-100 border border-blue-400";
+                const unselectedClasses = "bg-gray-100 border border-gray-300";
+
+                element.className = isSelected ? `${baseClasses} ${selectedClasses}` : `${baseClasses} ${unselectedClasses}`;
+                element.setAttribute('data-area-id', area.id);
+
+                const colorHex = getColorHex(area.color);
+                
+                // 比較エリアに表示する条件情報を文字列化
+                const conditionText = [
+                    area.type,
+                    area.structure,
+                    area.layouts.join('/')
+                ].filter(Boolean).join('・');
+                
+                element.innerHTML = `
+                    <div class="flex items-center w-full" data-action="toggle">
+                        <span class="w-3 h-3 rounded-full mr-3 flex-shrink-0" style="background-color: ${colorHex}; border: 1px solid ${colorHex};"></span>
+                        <div class="flex-grow min-w-0">
+                            <span class="font-medium text-gray-700 block truncate">${area.name}</span>
+                            <div class="text-xs text-gray-500 truncate mt-0.5">
+                                <span>${conditionText}</span> 
+                                <span class="ml-2 text-gray-400">${durationDisplay}</span>
+                            </div>
+                        </div>
+                        <span class="ml-3 text-xs ${isSelected ? 'text-blue-600' : 'text-gray-500'} flex-shrink-0">${isSelected ? '表示中' : '非表示'}</span>
+                    </div>
+                    <button data-action="remove" class="p-1 rounded-full text-gray-500 hover:bg-red-200 hover:text-red-600 transition ml-2 flex-shrink-0" title="比較対象から除外">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                `;
+
+                // イベントリスナーの追加
+                // トグル機能
+                element.querySelector('[data-action="toggle"]').addEventListener('click', (e) => {
+                    const targetId = element.getAttribute('data-area-id');
+                    toggleArea(targetId);
+                });
+                // 削除機能
+                element.querySelector('[data-action="remove"]').addEventListener('click', (e) => {
+                    e.stopPropagation(); // 親要素のトグルイベントを防ぐ
+                    const targetId = element.getAttribute('data-area-id');
+                    removeArea(targetId);
+                });
+
+                comparisonAreasContainer.appendChild(element);
+            });
+            renderChart(); // リスト更新後、グラフを再描画
+
+            // 履歴テーブルが表示中の場合は、データも更新する
+            if (currentView === 'history') {
+                renderHistoryTable();
+            }
+        };
+
+        // 比較エリアを追加（条件を適用する機能）
+        const addArea = () => {
+            const prefecture = document.getElementById('select-prefecture').value;
+            const city = document.getElementById('select-city').value;
+            const district = districtSelect.value; // DistrictName
+            const durationInYears = parseInt(durationSelect.value); // 期間を取得
+            
+            // 選択されている条件を取得
+            const conditions = getCurrentConditions();
+
+            // 必須項目（地域）のチェック
+            if (!prefecture && !city && !district) {
+                console.warn("比較エリアを追加するには、地域を選択してください。");
+                return; 
+            }
+
+            // 簡易的な地域名の組み立て
+            let areaName = '新規エリア ' + nextAreaId;
+            let districtNameText = '';
+            if (prefecture || city || district) {
+                const parts = [];
+                // 選択されたOptionのテキストを取得
+                const getSelectedText = (id) => document.getElementById(id).options[document.getElementById(id).selectedIndex].text;
+
+                if (prefecture) parts.push(getSelectedText('select-prefecture'));
+                if (city) {
+                    parts.push(getSelectedText('select-city'));
+                    districtNameText = getSelectedText('select-city'); // CityをDistrictNameの代わりに使用
+                }
+                if (district) {
+                    parts.push(getSelectedText('select-district')); // DistrictNameを使用
+                    districtNameText = getSelectedText('select-district'); // DistrictNameを優先
+                }
+                areaName = parts.join('・');
+            }
+
+            // 利用可能な色を取得
+            const assignedColors = comparisonAreas.map(a => a.color);
+            // 現在使われていない色、またはローテーション
+            const availableColor = availableColors.find(color => !assignedColors.includes(color)) || availableColors[nextAreaId % availableColors.length];
+
+            const newAreaId = 'area-' + nextAreaId;
+            
+            // 新規エリアのダミーデータ生成 (実際はAPIコールで取得)
+            if (true) { 
+                const randomBaseIdNum = Math.floor(Math.random() * 2) + 1;
+                const baseAreaId = `area-${randomBaseIdNum}`;
+                
+                masterTimeSeriesData.forEach(item => {
+                    if (item.area === baseAreaId) {
+                        masterTimeSeriesData.push({
+                            label: item.label,
+                            price: item.price + (Math.random() > 0.5 ? 200 : -200),
+                            unitPrice: item.unitPrice + (Math.random() > 0.5 ? 3 : -3),
+                            area: newAreaId
+                        });
+                    }
+                });
+            }
+
+            comparisonAreas.push({
+                id: newAreaId,
+                name: areaName,
+                districtName: districtNameText, // 履歴フィルタリング用に保存
+                color: availableColor,
+                selected: true,
+                type: conditions.type,
+                structure: conditions.structure,
+                layouts: conditions.layouts,
+                durationInYears: durationInYears 
+            });
+            nextAreaId++;
+            updateAreaListUI();
+        };
+        
+        // 地域選択の直下のボタンにイベントリスナーを設定
+        applyConditionBtn.addEventListener('click', addArea);
+
+
+        // グラフ表示のON/OFF切り替え
+        const toggleArea = (id) => {
+            const index = comparisonAreas.findIndex(area => area.id === id);
+            if (index !== -1) {
+                comparisonAreas[index].selected = !comparisonAreas[index].selected;
+                updateAreaListUI();
+            }
+        };
+
+        // 比較対象から除外（削除）
+        const removeArea = (id) => {
+            comparisonAreas = comparisonAreas.filter(area => area.id !== id);
+            // masterTimeSeriesData からも削除すべきだが、ダミーデータ管理を簡略化するためスキップ
+            updateAreaListUI();
+        };
+
+
+        // グラフ切り替え処理 (グラフサブタブ)
+        const switchChartSubTab = (type) => {
+            currentChartType = type;
+            
+            // ボタンのスタイル更新
+            chartTabs.forEach(btn => {
+                const isCurrent = (btn.id === 'btn-price-distribution' && type === 'price') || 
+                                  (btn.id === 'btn-unit-price-distribution' && type === 'unit_price');
+                if (isCurrent) {
+                    btn.classList.replace('bg-white', 'bg-blue-500');
+                    btn.classList.replace('text-gray-700', 'text-white');
+                    btn.classList.replace('hover:bg-gray-200', 'hover:bg-blue-600');
+                } else {
+                    btn.classList.replace('bg-blue-500', 'bg-white');
+                    btn.classList.replace('text-white', 'text-gray-700');
+                    btn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-200');
+                }
+            });
+
+            renderChart();
+        };
+        
+        document.getElementById('btn-price-distribution').addEventListener('click', () => switchChartSubTab('price'));
+        document.getElementById('btn-unit-price-distribution').addEventListener('click', () => switchChartSubTab('unit_price'));
+        
+        // メインビューの切り替え
+        const switchMainView = (view) => {
+            currentView = view;
+            
+            // タブのスタイル更新
+            document.querySelectorAll('.main-tab').forEach(btn => {
+                const isCurrent = (btn.id === 'tab-chart' && view === 'chart') || 
+                                  (btn.id === 'tab-history' && view === 'history');
+                if (isCurrent) {
+                    btn.classList.replace('bg-white', 'bg-blue-500');
+                    btn.classList.replace('text-gray-700', 'text-white');
+                    btn.classList.replace('hover:bg-gray-200', 'hover:bg-blue-600');
+                } else {
+                    btn.classList.replace('bg-blue-500', 'bg-white');
+                    btn.classList.replace('text-white', 'text-gray-700');
+                    btn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-200');
+                }
+            });
+            
+            // コンテンツの表示/非表示切り替え
+            if (view === 'chart') {
+                chartView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+                renderChart();
+            } else {
+                chartView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                renderHistoryTable(); // 履歴タブが開いたときにのみレンダリング
+            }
+        };
+
+        tabChartBtn.addEventListener('click', () => switchMainView('chart'));
+        tabHistoryBtn.addEventListener('click', () => switchMainView('history'));
+
+
+        
+        // 集計期間変更時のリスナーを追加 (セレクトボックスの変更を直接処理)
+        durationSelect.addEventListener('change', () => {
+            // グラフを再描画する
+            if (currentView === 'chart') {
+                renderChart();
+            }
+            // エリア一覧の期間表示も更新する
+            updateAreaListUI();
+            // 履歴も更新する (historyビューの場合)
+            if (currentView === 'history') {
+                renderHistoryTable();
+            }
+        });
+
+        // -----------------------------------------------------------
+        // 直近の売買履歴テーブル表示/非表示のロジック (選択エリアでフィルタリング)
+        // -----------------------------------------------------------
+
+        const renderHistoryTable = () => {
+            historyContainer.innerHTML = ''; // コンテナをクリア
+            
+            // グラフで現在「表示中」になっているエリアを取得
+            const activeAreas = comparisonAreas.filter(area => area.selected);
+
+            if (activeAreas.length === 0) {
+                historyContainer.innerHTML = '<div class="p-6 text-center text-gray-500 bg-white rounded-xl shadow-lg">比較エリア一覧で表示中のエリアを選択してください。</div>';
+                return;
+            }
+
+            activeAreas.forEach(area => {
+                const selectedDistrictName = area.districtName; 
+                
+                // データをフィルタリング
+                const filteredHistory = recentHistoryData.filter(history => {
+                    // 履歴データ内の city または district が、選択された districtName に含まれているかチェック
+                    return history.city.includes(selectedDistrictName) || history.district.includes(selectedDistrictName);
+                });
+                
+                // エリアごとのコンテナ div を作成
+                const areaDiv = document.createElement('div');
+                areaDiv.className = 'bg-white p-4 rounded-xl shadow-lg border border-gray-100'; // エリアごとのカードデザイン
+
+                // エリアごとのタイトル
+                const title = document.createElement('h3');
+                title.className = 'text-xl font-bold text-gray-700 mb-3';
+                title.textContent = `${area.name} の取引履歴`;
+                areaDiv.appendChild(title);
+
+                if (filteredHistory.length === 0) {
+                    const noData = document.createElement('p');
+                    noData.className = 'text-sm text-gray-400';
+                    noData.textContent = '該当する取引履歴は見つかりませんでした。';
+                    areaDiv.appendChild(noData);
+                } else {
+                    // テーブル構造の構築
+                    const tableContainer = document.createElement('div');
+                    tableContainer.className = 'overflow-x-auto area-history-scroll'; // CSSで定義されたスクロールコンテナ
+                    
+                    const table = document.createElement('table');
+                    table.className = 'min-w-full divide-y divide-gray-200';
+                    
+                    // ヘッダー
+                    table.innerHTML = `
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">取引時期</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">取引価格 (万円)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">間取り</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">構造</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">面積 (㎡)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地域</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    `;
+                    const tbody = table.querySelector('tbody');
+
+                    // データを日付順にソートして表示
+                    filteredHistory.sort((a, b) => new Date(b.date.replace('年', '/').replace('月', '/')) - new Date(a.date.replace('年', '/').replace('月', '/'))).forEach(history => {
+                        const row = tbody.insertRow();
+                        row.className = 'hover:bg-gray-50';
+                        
+                        const data = [
+                            history.date,
+                            history.price.toLocaleString(),
+                            history.layout,
+                            history.structure,
+                            history.area.toFixed(1),
+                            history.city + ' ' + history.district 
+                        ];
+
+                        data.forEach(text => {
+                            const cell = row.insertCell();
+                            cell.textContent = text;
+                            cell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-gray-500');
+                        });
+                    });
+                    
+                    tableContainer.appendChild(table);
+                    areaDiv.appendChild(tableContainer);
+                }
+                
+                historyContainer.appendChild(areaDiv);
+            });
+        };
+
+        // -----------------------------------------------------------
+        
+
+        // モバイルメニューのトグル機能
+        menuToggle.addEventListener('click', () => {
+            const sidebarElement = document.getElementById('sidebar');
+            const openIcon = document.querySelector('#menu-toggle svg:first-child');
+            const closeIcon = document.querySelector('#menu-toggle svg:last-child');
+            const isSidebarVisible = sidebarElement.classList.contains('translate-x-0') && sidebarElement.classList.contains('absolute');
+            
+            if (isSidebarVisible) {
+                sidebarElement.classList.remove('translate-x-0');
+                sidebarElement.classList.add('-translate-x-full');
+                openIcon.style.display = 'block';
+                closeIcon.style.display = 'none';
+            } else {
+                sidebarElement.classList.add('translate-x-0');
+                sidebarElement.classList.remove('-translate-x-full');
+                openIcon.style.display = 'none';
+                closeIcon.style.display = 'block';
+            }
+        });
+
+        // 画面幅がmd以上になったらサイドバーを常に表示し、トグルボタンを初期化
+        window.addEventListener('resize', () => {
+            const sidebarElement = document.getElementById('sidebar');
+
+            if (window.innerWidth >= 768) {
+                // デスクトップの場合
+                sidebarElement.classList.remove('-translate-x-full', 'absolute', 'w-full');
+                sidebarElement.classList.add('w-80', 'relative', 'translate-x-0');
+            } else {
+                // モバイルの場合
+                sidebarElement.classList.remove('w-80', 'relative', 'translate-x-0');
+                sidebarElement.classList.add('absolute', 'w-full');
+            }
+            if (myChart) {
+                myChart.resize();
+            }
+        });
+
+        // 初期ロード時の処理
+        window.onload = () => {
+            // 初期ビューは「グラフ分析」
+            switchMainView('chart');
+            switchChartSubTab('price');
+            // 比較エリア一覧を初期化
+            updateAreaListUI();
+            // 条件ボタンのリスナーを設定
+            setupConditionListeners(); 
+
+            // モバイル時の初期状態（非表示）を設定
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full', 'absolute', 'w-full');
+            } else {
+                // デスクトップの初期表示
+                document.getElementById('sidebar').classList.add('translate-x-0', 'relative', 'w-80');
+                document.getElementById('sidebar').classList.remove('absolute');
+            }
+            
+            // モバイルトグルアイコンの初期設定
+            const openIcon = document.querySelector('#menu-toggle svg:first-child');
+            const closeIcon = document.querySelector('#menu-toggle svg:last-child');
+            openIcon.style.display = 'block';
+            closeIcon.style.display = 'none';
+        };
+
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDashboard } from '../contexts/DashboardContext';
 import {
   ChartErrorBoundary,
@@ -6,6 +6,7 @@ import {
   DurationSelector,
   RealEstatePriceChart,
 } from './index';
+import TransactionHistory from './TransactionHistory';
 
 const MainBoard: React.FC = () => {
   const {
@@ -21,30 +22,81 @@ const MainBoard: React.FC = () => {
     handleDurationChange,
   } = useDashboard();
 
-  return (
-    <main className="main-content flex-1 p-6 flex flex-col min-w-0 bg-gray-100">
-      <h2 className="text-3xl font-bold text-gray-800 mb-4">分析グラフ</h2>
+  // タブの状態管理
+  const [currentView, setCurrentView] = useState<'chart' | 'history'>('chart');
 
-      {/* 期間選択（右上に配置） */}
-      <div className="mb-4">
-        <DurationSelector
-          selectedDuration={selectedDuration}
-          onDurationChange={handleDurationChange}
-        />
+  return (
+    <main className="main-content flex-1 h-full p-6 flex flex-col min-w-0 bg-gray-100 overflow-y-auto">
+      {/* タブ切り替えと期間選択を同じ行に配置 */}
+      <div className="flex items-center justify-between mb-4 flex-wrap">
+        {/* タブグループ (左側) */}
+        <div className="flex space-x-2 sm:space-x-4 mb-2 sm:mb-0">
+          {/* グラフのタブ */}
+          <button
+            onClick={() => setCurrentView('chart')}
+            className={`main-tab px-4 sm:px-6 py-2 font-semibold rounded-xl shadow-md transition ${
+              currentView === 'chart'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-white text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            グラフ
+          </button>
+          {/* 取引履歴のタブ */}
+          <button
+            onClick={() => setCurrentView('history')}
+            className={`main-tab px-4 sm:px-6 py-2 font-semibold rounded-xl shadow-md transition ${
+              currentView === 'history'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-white text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            取引履歴
+          </button>
+        </div>
+
+        {/* 期間選択 (右側) */}
+        <div className="flex items-center">
+          <label
+            htmlFor="select-duration"
+            className="text-gray-700 font-semibold mr-4 whitespace-nowrap text-sm sm:text-base"
+          >
+            集計期間:
+          </label>
+          <DurationSelector
+            selectedDuration={selectedDuration}
+            onDurationChange={handleDurationChange}
+          />
+        </div>
       </div>
 
-      {/* グラフ切り替えタブ */}
-      <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
+      {/* タブコンテンツエリア */}
+      <div className="flex-1 min-h-[400px]">
+        {currentView === 'chart' ? (
+          /* グラフコンテンツ */
+          <div className="w-full h-full bg-white p-6 rounded-xl shadow-2xl flex flex-col">
+            {/* グラフサブタブ */}
+            <ChartTypeSelector chartType={chartType} onChartTypeChange={setChartType} />
 
-      {/* グラフコンポーネント */}
-      <ChartErrorBoundary>
-        <RealEstatePriceChart
-          chartType={chartType}
-          comparisonAreas={comparisonAreas}
-          areaMasterData={areaMasterData}
-          chartLabels={chartLabels}
-        />
-      </ChartErrorBoundary>
+            {/* グラフコンテナ */}
+            <div className="flex-1 relative min-h-[250px]">
+              <ChartErrorBoundary>
+                <RealEstatePriceChart
+                  chartType={chartType}
+                  comparisonAreas={comparisonAreas}
+                  areaMasterData={areaMasterData}
+                  chartLabels={chartLabels}
+                />
+              </ChartErrorBoundary>
+            </div>
+          </div>
+        ) : (
+          /* 取引履歴コンテンツ */
+          <div className="w-full h-full">
+            <TransactionHistory />
+          </div>
+        )}
+      </div>
     </main>
   );
 };

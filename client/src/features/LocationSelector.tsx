@@ -65,10 +65,10 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           onChange={(e) => handleStationChange(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          <option value="">最寄り駅を選択</option>
-          <option value="shibuya">渋谷駅</option>
-          <option value="shinjuku">新宿駅</option>
-          <option value="ikebukuro">池袋駅</option>
+          <option value="">地区名を選択</option>
+          <option value="shibuya">渋谷</option>
+          <option value="shinjuku">新宿</option>
+          <option value="ikebukuro">池袋</option>
         </select>
       </div>
     </div>
