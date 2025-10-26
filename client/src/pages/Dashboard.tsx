@@ -183,10 +183,10 @@ const Dashboard = () => {
             {/* 中古、新品 */}
             <h2 className="text-lg font-semibold text-gray-700 mb-2">物件の状態</h2>
             <div className="grid grid-cols-2 gap-2">
-              <button className="px-3 py-2 text-left bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+              <button className="px-3 py-2 text-center bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                 新品
               </button>
-              <button className="px-3 py-2 text-left bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-3 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
                 中古
               </button>
             </div>
@@ -220,30 +220,42 @@ const Dashboard = () => {
           {/* レイアウト */}
           <div>
             <h2 className="text-lg font-semibold text-gray-700 mb-2">レイアウト</h2>
-            <div className="grid grid-cols-2 gap-2">
-              <button className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                1R
+            <div className="grid grid-cols-3 gap-2">
+              <button className="px-2 py-2 text-center bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
+                1R / 1K
               </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                1K
-              </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
                 1DK
               </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
                 1LDK
               </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
                 2K
               </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
                 2DK
               </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
                 2LDK
               </button>
-              <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
+                3K
+              </button>
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
+                3DK
+              </button>
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
                 3LDK
+              </button>
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
+                4K
+              </button>
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
+                4DK
+              </button>
+              <button className="px-2 py-2 text-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">
+                4LDK
               </button>
             </div>
           </div>
