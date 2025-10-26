@@ -1,25 +1,16 @@
-import { Button, Stack } from '@chakra-ui/react';
-import styled from 'styled-components';
-
-const ButtonWrapper = styled.div`
-  border-radius: 12px;
-`;
+import styles from '../../styles/components/PrimaryButton.module.css';
 
 type ButtonProps = {
   text: string;
+  onClick: () => void;
+  disabled?: boolean;
 };
 
-const PrimaryButton: React.FC<ButtonProps> = ({ text }) => {
+const PrimaryButton: React.FC<ButtonProps> = ({ text, onClick, disabled = false }) => {
   return (
-    <ButtonWrapper>
-      <Stack gap="2" align="flex-start">
-        <Stack align="center" direction="row" gap="10">
-          <Button colorScheme="blue" width="180px">
-            {text}
-          </Button>
-        </Stack>
-      </Stack>
-    </ButtonWrapper>
+    <button className={styles.button} onClick={onClick} disabled={disabled} type="button">
+      <span className={styles.buttonText}>{text}</span>
+    </button>
   );
 };
 

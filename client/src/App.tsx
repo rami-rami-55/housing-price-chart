@@ -1,11 +1,11 @@
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import { RealEstateSearch } from './components/features/RealEstateSearch';
+import { Top } from './pages/Top';
 
 const theme = extendTheme();
 
 const App: React.FC = () => (
   <ChakraProvider theme={theme}>
-    <RealEstateSearch />
+    <Top />
   </ChakraProvider>
 );
 

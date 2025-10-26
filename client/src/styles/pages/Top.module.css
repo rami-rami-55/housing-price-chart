@@ -1,0 +1,118 @@
+/* TopRe.module.css: Tailwind→CSS変換 */
+.root {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background: #fff;
+  overflow-x: hidden;
+  font-family: 'Public Sans', 'Noto Sans', sans-serif;
+}
+.layoutContainer {
+  display: flex;
+  height: 100%;
+  flex-grow: 1;
+  flex-direction: column;
+}
+.centerArea {
+  padding-left: 10rem;
+  padding-right: 10rem;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+  max-width: 960px;
+  flex: 1;
+}
+.flexWrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+.title {
+  color: #121516;
+  letter-spacing: 0.02em;
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1.2;
+  min-width: 18rem;
+}
+.sectionTitle {
+  color: #121516;
+  font-size: 1.125rem;
+  font-weight: bold;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  padding-left: 1rem;
+  padding-bottom: 0.5rem;
+  padding-top: 1rem;
+}
+.flexRow {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  flex-wrap: wrap;
+  padding-right: 1rem;
+}
+.chip {
+  display: flex;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: #f1f3f4;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.chipText {
+  color: #121516;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.selectRow {
+  display: flex;
+  max-width: 30rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.selectLabel {
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  flex: 1;
+}
+.select {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  resize: none;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  color: #121516;
+  border: 1px solid #dde1e3;
+  background: #fff;
+  height: 3.5rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 15px;
+}
+.select::placeholder {
+  color: #6a7881;
+}

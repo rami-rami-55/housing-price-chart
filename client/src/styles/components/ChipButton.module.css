@@ -1,0 +1,26 @@
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  border-radius: 9999px;
+  background: #f1f3f4;
+  padding: 0 1rem;
+  border: none;
+  cursor: pointer;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+.chipText {
+  color: #121516;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.selected {
+  background: #3f8cbf;
+  color: #fff;
+}
+.chip.selected .chipText {
+  color: #fff;
+}
