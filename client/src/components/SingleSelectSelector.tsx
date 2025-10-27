@@ -16,7 +16,7 @@ const SingleSelectSelector: React.FC<SingleSelectSelectorProps> = ({
   selectedValue,
   onValueChange,
   gridCols = 'grid-cols-3',
-  buttonClassName = '',
+  buttonClassName = 'text-sm font-medium px-4 py-3 min-h-[48px]',
 }) => {
   const handleButtonClick = (value: string) => {
     if (onValueChange) {

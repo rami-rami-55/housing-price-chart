@@ -12,6 +12,7 @@ const MultiStructureSelector: React.FC<MultiStructureSelectorProps> = ({
 }) => {
   const structures = [
     { id: 'wood', label: '木造', value: 'wood' },
+    { id: 'steel', label: '鉄骨造', value: 'steel' },
     { id: 'rc', label: 'RC', value: 'rc' },
     { id: 'src', label: 'SRC', value: 'src' },
   ];
@@ -22,7 +23,8 @@ const MultiStructureSelector: React.FC<MultiStructureSelectorProps> = ({
       options={structures}
       selectedValues={selectedStructures}
       onValuesChange={onStructuresChange}
-      gridCols="grid-cols-3"
+      gridCols="grid-cols-2"
+      buttonClassName="text-sm font-medium px-4 py-3 min-h-[48px]"
     />
   );
 };
