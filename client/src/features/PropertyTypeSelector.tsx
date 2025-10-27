@@ -1,14 +1,14 @@
 import React from 'react';
-import { MultiSelectSelector } from '../components';
+import { SingleSelectSelector } from '../components';
 
-interface MultiPropertyTypeSelectorProps {
-  selectedTypes?: string[];
-  onTypesChange?: (types: string[]) => void;
+interface PropertyTypeSelectorProps {
+  selectedType?: string;
+  onTypeChange?: (type: string) => void;
 }
 
-const MultiPropertyTypeSelector: React.FC<MultiPropertyTypeSelectorProps> = ({
-  selectedTypes = [],
-  onTypesChange,
+const PropertyTypeSelector: React.FC<PropertyTypeSelectorProps> = ({
+  selectedType,
+  onTypeChange,
 }) => {
   const propertyTypes = [
     { id: 'mansion', label: 'マンション', value: 'mansion' },
@@ -17,15 +17,15 @@ const MultiPropertyTypeSelector: React.FC<MultiPropertyTypeSelectorProps> = ({
   ];
 
   return (
-    <MultiSelectSelector
+    <SingleSelectSelector
       title="物件の種類"
       options={propertyTypes}
-      selectedValues={selectedTypes}
-      onValuesChange={onTypesChange}
+      selectedValue={selectedType}
+      onValueChange={onTypeChange}
       gridCols="grid-cols-1"
       buttonClassName="text-left px-4"
     />
   );
 };
 
-export default MultiPropertyTypeSelector;
+export default PropertyTypeSelector;

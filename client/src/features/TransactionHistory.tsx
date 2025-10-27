@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDashboard } from '../contexts/DashboardContext';
+import { ComparisonArea } from '../types/estate';
 
 interface TransactionRecord {
   date: string;
@@ -12,142 +13,82 @@ interface TransactionRecord {
 }
 
 const TransactionHistory: React.FC = () => {
-  const { comparisonAreas } = useDashboard();
+  const { comparisonAreas, selectedDuration } = useDashboard();
   // タブ表示の場合は常に表示するため、isHistoryVisibleは削除
 
-  // ダミーの取引履歴データ
-  const recentHistoryData: TransactionRecord[] = [
-    {
-      date: '2024年10月',
-      price: 6200,
-      layout: '2LDK',
-      structure: '木造',
-      area: 85,
-      city: '世田谷区',
-      district: '世田谷区',
-    },
-    {
-      date: '2024年09月',
-      price: 5500,
-      layout: '1K',
-      structure: 'RC',
-      area: 30,
-      city: '目黒区',
-      district: '目黒区',
-    },
-    {
-      date: '2024年09月',
-      price: 5900,
-      layout: '3LDK',
-      structure: 'SRC',
-      area: 78,
-      city: '世田谷区',
-      district: '世田谷区',
-    },
-    {
-      date: '2024年08月',
-      price: 5100,
-      layout: '4LDK+',
-      structure: '木造',
-      area: 100,
-      city: '新宿区',
-      district: '新宿地区',
-    },
-    {
-      date: '2024年07月',
-      price: 4200,
-      layout: '2DK',
-      structure: 'RC',
-      area: 65,
-      city: '目黒区',
-      district: '目黒区',
-    },
-    {
-      date: '2024年07月',
-      price: 5300,
-      layout: '2K',
-      structure: '木造',
-      area: 55,
-      city: '渋谷区',
-      district: '渋谷地区',
-    },
-    {
-      date: '2024年06月',
-      price: 4500,
-      layout: '3DK',
-      structure: 'SRC',
-      area: 70,
-      city: '世田谷区',
-      district: '世田谷区',
-    },
-    {
-      date: '2024年05月',
-      price: 5000,
-      layout: '1LDK',
-      structure: 'RC',
-      area: 45,
-      city: '目黒区',
-      district: '目黒区',
-    },
-    {
-      date: '2024年04月',
-      price: 5800,
-      layout: '4DK',
-      structure: '木造',
-      area: 90,
-      city: '新宿区',
-      district: '新宿地区',
-    },
-    {
-      date: '2024年03月',
-      price: 4100,
-      layout: '1K',
-      structure: 'RC',
-      area: 35,
-      city: '渋谷区',
-      district: '渋谷地区',
-    },
-    {
-      date: '2024年02月',
-      price: 4700,
-      layout: '2LDK',
-      structure: 'SRC',
-      area: 60,
-      city: '世田谷区',
-      district: '世田谷区',
-    },
-    {
-      date: '2024年01月',
-      price: 5200,
-      layout: '3LDK',
-      structure: '木造',
-      area: 80,
-      city: '目黒区',
-      district: '目黒区',
-    },
-    {
-      date: '2023年12月',
-      price: 4300,
-      layout: '2DK',
-      structure: 'RC',
-      area: 50,
-      city: '渋谷区',
-      district: '渋谷地区',
-    },
-    {
-      date: '2023年11月',
-      price: 5600,
-      layout: '4LDK+',
-      structure: '木造',
-      area: 110,
-      city: '新宿区',
-      district: '新宿地区',
-    },
-  ];
+  // 四半期ラベルを比較可能な形式 (YYYYQQ) に変換する関数
+  const quarterLabelToComparable = (label: string): number => {
+    const match = label.match(/(\d{4})年Q(\d)/);
+    if (match) {
+      return parseInt(match[1]) * 10 + parseInt(match[2]);
+    }
+    return 0;
+  };
+
+  // 期間に応じた取引履歴データ生成関数
+  const generateTransactionData = (durationInYears: number): TransactionRecord[] => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentQuarter = Math.floor(currentDate.getMonth() / 3) + 1;
+
+    let totalPoints: number;
+    switch (durationInYears) {
+      case 1:
+        totalPoints = 8; // 1年→8件程度
+        break;
+      case 3:
+        totalPoints = 15; // 3年→15件程度
+        break;
+      case 5:
+        totalPoints = 20; // 5年→20件程度
+        break;
+      default:
+        totalPoints = 10;
+        break;
+    }
+
+    const transactions: TransactionRecord[] = [];
+    const layouts = ['1R', '1K', '1DK', '1LDK', '2K', '2DK', '2LDK', '3LDK'];
+    const structures = ['木造', 'RC', 'SRC', '鉄骨造'];
+    const areas = [20, 25, 30, 40, 50, 60, 70, 85, 100];
+    const districts = ['世田谷', '自由が丘駅', '渋谷', '新宿', '池袋', '品川'];
+    const cities = ['世田谷区', '目黒区', '渋谷区', '新宿区', '豊島区', '品川区'];
+
+    for (let i = 0; i < totalPoints; i++) {
+      // ランダムな四半期を生成（過去の期間内）
+      const quartersBack = Math.floor(Math.random() * (durationInYears * 4));
+      let targetYear = currentYear;
+      let targetQuarter = currentQuarter - quartersBack;
+
+      while (targetQuarter <= 0) {
+        targetYear--;
+        targetQuarter += 4;
+      }
+
+      transactions.push({
+        date: `${targetYear}年Q${targetQuarter}`,
+        price: Math.floor(Math.random() * 3000) + 3000, // 3000-6000万円
+        layout: layouts[Math.floor(Math.random() * layouts.length)],
+        structure: structures[Math.floor(Math.random() * structures.length)],
+        area: areas[Math.floor(Math.random() * areas.length)],
+        district: districts[Math.floor(Math.random() * districts.length)],
+        city: cities[Math.floor(Math.random() * cities.length)],
+      });
+    }
+
+    return transactions.sort(
+      (a, b) => quarterLabelToComparable(b.date) - quarterLabelToComparable(a.date)
+    );
+  };
+
+  // ダミーの取引履歴データ（四半期形式）
+  const recentHistoryData: TransactionRecord[] = generateTransactionData(
+    parseInt(selectedDuration)
+  );
 
   const renderHistoryTable = () => {
     // 表示中（selected=true）のエリアを取得
-    const activeAreas = comparisonAreas.filter((area) => area.selected);
+    const activeAreas = comparisonAreas.filter((area: ComparisonArea) => area.selected);
 
     if (activeAreas.length === 0) {
       return (
@@ -157,7 +98,7 @@ const TransactionHistory: React.FC = () => {
       );
     }
 
-    return activeAreas.map((area) => {
+    return activeAreas.map((area: ComparisonArea) => {
       const selectedDistrictName = area.name; // エリアの名前を使用
 
       // データをフィルタリング
@@ -205,7 +146,9 @@ const TransactionHistory: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredHistory
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .sort(
+                      (a, b) => quarterLabelToComparable(b.date) - quarterLabelToComparable(a.date)
+                    )
                     .map((record, index) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">

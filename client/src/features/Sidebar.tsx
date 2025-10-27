@@ -4,8 +4,8 @@ import {
   ComparisonAreaList,
   LocationSelector,
   MultiLayoutSelector,
-  MultiPropertyTypeSelector,
   MultiStructureSelector,
+  PropertyTypeSelector,
   SearchButton,
   SidebarHeader,
 } from './index';
@@ -17,14 +17,14 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const {
     // 状態
-    selectedPropertyTypes,
+    selectedPropertyType,
     selectedStructures,
     selectedLayouts,
     selectedAreaName,
     comparisonAreas,
 
     // アクション
-    handlePropertyTypesChange,
+    handlePropertyTypeChange,
     handleStructuresChange,
     handleLayoutsChange,
     handleAreaNameChange,
@@ -40,9 +40,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <SidebarHeader />
 
       <div className="space-y-6 pb-6">
-        <MultiPropertyTypeSelector
-          selectedTypes={selectedPropertyTypes}
-          onTypesChange={handlePropertyTypesChange}
+        <PropertyTypeSelector
+          selectedType={selectedPropertyType}
+          onTypeChange={handlePropertyTypeChange}
         />
 
         <MultiStructureSelector

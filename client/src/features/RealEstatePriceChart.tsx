@@ -135,7 +135,7 @@ const RealEstatePriceChart: React.FC<RealEstatePriceChartProps> = ({
           x: {
             title: {
               display: true,
-              text: '年月',
+              text: '四半期',
               color: '#4b5563',
             },
           },

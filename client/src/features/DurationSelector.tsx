@@ -30,7 +30,6 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({
         <option value="1">直近1年</option>
         <option value="3">直近3年</option>
         <option value="5">直近5年</option>
-        <option value="10">直近10年</option>
       </select>
     </div>
   );

@@ -25,12 +25,12 @@ servers:
     description: Production server
 
 paths:
-  /areas/search:
-    get:
+  /api/estate/detail:
+    post:
       tags:
-        - Areas
-      summary: 条件に基づいて比較エリアを検索
-      description: 物件タイプ、構造、間取り、地域などの条件に基づいて比較可能なエリアを検索
+        - Estate
+      summary: 詳細な物件情報を取得
+      description: 物件タイプ、構造、間取り、地域などの条件に基づいて詳細な取引情報を取得
       requestBody:
         required: true
         content:
@@ -41,17 +41,13 @@ paths:
               propertyTypes: ["中古マンション等"]
               structures: ["wood"]
               layouts: ["2K", "2DK"]
-              prefecture: "tokyo"
-              city: "setagaya"
-              districtName: "shibuya"
+              station: "北千住"
               durationInYears: 3
       responses:
         "200":
           description: 検索結果の比較エリア情報
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/AreaSearchResponse"
               example:
                 areas:
                   - prefecture: "東京都"
@@ -67,88 +63,159 @@ paths:
                     period: "2025年第1四半期"
                     renovation: "未改装"
 
-  /locations/municipalities:
-    get:
+  /api/estate/average:
+    post:
       tags:
-        - Locations
-      summary: 市区町村一覧を取得
-      description: 指定された都道府県の市区町村一覧を取得
-      parameters:
-        - name: prefecture
-          in: query
-          required: true
-          description: 都道府県名
-          schema:
-            type: string
-            example: "東京都"
+        - Estate
+      summary: 指定エリアの四半期別平均価格履歴を取得
+      description: |
+        指定された駅・地区の物件について、指定期間の四半期ごとの平均価格を集計して返します。
+        物件タイプ、構造、間取りなどの条件でフィルタリングが可能です。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PriceHistoryRequest"
+            example:
+              areaConditions:
+                - station: "北千住"
+                  propertyTypes: "中古マンション等"
+                  structures: ["RC", "SRC"]
+                  layouts: ["2K", "2DK", "3LDK"]
+                - station: "綾瀬"
+                  propertyTypes: "中古マンション等"
+                  structures: ["wood", "RC"]
+                  layouts: ["1R", "1K", "2K"]
+                - station: "亀有"
+                  propertyTypes: "宅地(土地と建物)"
+                  structures: ["wood"]
+                  layouts: ["3LDK", "4LDK_plus"]
+              durationInYears: 3
+
       responses:
         "200":
-          description: 市区町村一覧
+          description: 四半期別平均価格履歴
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/MunicipalitiesResponse"
               example:
-                cities:
-                  - code: "chiyoda"
-                    name: "千代田区"
-                  - code: "chuo"
-                    name: "中央区"
-                  - code: "minato"
-                    name: "港区"
-                  - code: "shinjuku"
-                    name: "新宿区"
-                  - code: "setagaya"
-                    name: "世田谷区"
+                duration: 3
+                totalQuarters: 12
+                chartLabels:
+                  - "2022年Q4"
+                  - "2023年Q1"
+                  - "2023年Q2"
+                  - "2023年Q3"
+                  - "2023年Q4"
+                  - "2024年Q1"
+                  - "2024年Q2"
+                  - "2024年Q3"
+                  - "2024年Q4"
+                  - "2025年Q1"
+                  - "2025年Q2"
+                  - "2025年Q3"
+                areas:
+                  - areaName: "北千住駅"
+                    priceData:
+                      [
+                        4200,
+                        4350,
+                        4420,
+                        4480,
+                        4550,
+                        4650,
+                        4720,
+                        4800,
+                        4850,
+                        4920,
+                        5000,
+                        5080,
+                      ]
+                    unitPriceData:
+                      [
+                        68.5,
+                        70.2,
+                        71.1,
+                        72.0,
+                        73.2,
+                        74.8,
+                        75.9,
+                        77.2,
+                        78.0,
+                        79.1,
+                        80.5,
+                        81.7,
+                      ]
+                  - areaName: "綾瀬駅"
+                    priceData:
+                      [
+                        3800,
+                        3920,
+                        3980,
+                        4050,
+                        4120,
+                        4200,
+                        4280,
+                        4350,
+                        4420,
+                        4500,
+                        4580,
+                        4650,
+                      ]
+                    unitPriceData:
+                      [
+                        61.2,
+                        63.1,
+                        64.0,
+                        65.2,
+                        66.4,
+                        67.6,
+                        68.8,
+                        70.0,
+                        71.2,
+                        72.5,
+                        73.8,
+                        75.0,
+                      ]
+                  - areaName: "亀有駅"
+                    priceData:
+                      [
+                        3500,
+                        3620,
+                        3680,
+                        3740,
+                        3810,
+                        3880,
+                        3950,
+                        4020,
+                        4090,
+                        4160,
+                        4230,
+                        4300,
+                      ]
+                    unitPriceData:
+                      [
+                        58.3,
+                        60.1,
+                        61.2,
+                        62.3,
+                        63.5,
+                        64.7,
+                        65.8,
+                        67.0,
+                        68.2,
+                        69.3,
+                        70.5,
+                        71.7,
+                      ]
         "400":
           description: パラメータが不正
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
-  /locations/districts:
-    get:
-      tags:
-        - Locations
-      summary: 地区名一覧を取得
-      description: 指定された市区町村の地区名（町名等）一覧を取得
-      parameters:
-        - name: prefecture
-          in: query
-          required: true
-          description: 都道府県名
-          schema:
-            type: string
-            example: "東京都"
-        - name: municipality
-          in: query
-          required: true
-          description: 市区町村名
-          schema:
-            type: string
-            example: "港区"
-      responses:
-        "200":
-          description: 地区名一覧
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DistrictsResponse"
-              example:
-                districts:
-                  - code: "akasaka"
-                    name: "赤坂"
-                  - code: "azabu"
-                    name: "麻布"
-                  - code: "higashishinbashi"
-                    name: "東新橋"
-                  - code: "nippori"
-                    name: "虎ノ門"
-                  - code: "roppongi"
-                    name: "六本木"
-        "400":
-          description: パラメータが不正
+        "404":
+          description: 指定されたエリアが見つからない
           content:
             application/json:
               schema:
@@ -197,8 +264,96 @@ components:
           description: 最寄り駅・地区コード
         durationInYears:
           type: integer
-          enum: [1, 3, 5, 10]
+          enum: [1, 3, 5]
           description: 分析期間（年数）
+
+    PriceHistoryRequest:
+      type: object
+      required:
+        - areaConditions
+        - durationInYears
+      properties:
+        areaConditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AreaCondition"
+          description: 各エリア（駅・地区）ごとの検索条件
+        durationInYears:
+          type: integer
+          enum: [1, 3, 5]
+          description: 分析期間（年数）- 全エリア共通
+
+    AreaCondition:
+      type: object
+      required:
+        - station
+        - propertyTypes
+      properties:
+        station:
+          type: string
+          description: 駅・地区コード
+        propertyTypes:
+          type: array
+          items:
+            type: string
+            enum: ["中古マンション等", "宅地(土地と建物)", "宅地(土地)"]
+          description: 物件タイプ（複数選択可）
+        propertyStatuses:
+          type: array
+          items:
+            type: string
+            enum: ["new", "used"]
+          description: 物件状態（複数選択可）
+        structures:
+          type: array
+          items:
+            type: string
+            enum: ["wood", "RC", "SRC"]
+          description: 構造（複数選択可）
+        layouts:
+          type: array
+          items:
+            type: string
+            enum: ["1R_1K", "1DK", "2K", "2DK", "3LDK", "4LDK_plus"]
+          description: 間取り（複数選択可）
+
+    PriceHistoryResponse:
+      type: object
+      properties:
+        duration:
+          type: integer
+          description: 取得期間（年数）
+        totalQuarters:
+          type: integer
+          description: 総四半期数
+        chartLabels:
+          type: array
+          items:
+            type: string
+          description: チャートのラベル配列（四半期形式）
+          example: ["2023年Q1", "2023年Q2", "2023年Q3", "2023年Q4"]
+        areas:
+          type: array
+          items:
+            $ref: "#/components/schemas/AreaPriceHistory"
+          description: 各エリア・駅の価格履歴データ
+
+    AreaPriceHistory:
+      type: object
+      properties:
+        areaName:
+          type: string
+          description: エリア名（駅名・地区名）
+        priceData:
+          type: array
+          items:
+            type: number
+          description: 四半期ごとの平均価格データ配列（万円）
+        unitPriceData:
+          type: array
+          items:
+            type: number
+          description: 四半期ごとの平均単価データ配列（万円/㎡）
 
     AreaSearchResponse:
       type: object
@@ -217,242 +372,15 @@ components:
         name:
           type: string
           description: エリア名
-        districtName:
-          type: string
-          description: 地区名
         prefecture:
           type: string
-          description: 都道府県コード
+          description: 都道府県名
         city:
           type: string
-          description: 市区町村コード
+          description: 市区町村名
         station:
           type: string
-          description: 最寄り駅・地区コード
-        coordinates:
-          $ref: "#/components/schemas/Coordinates"
-        marketInfo:
-          $ref: "#/components/schemas/MarketInfo"
-
-    Coordinates:
-      type: object
-      properties:
-        latitude:
-          type: number
-          format: float
-          description: 緯度
-        longitude:
-          type: number
-          format: float
-          description: 経度
-
-    MarketInfo:
-      type: object
-      properties:
-        averagePrice:
-          type: number
-          description: 平均価格（万円）
-        averageUnitPrice:
-          type: number
-          description: 平均単価（万円/㎡）
-        transactionCount:
-          type: integer
-          description: 取引件数
-
-    PriceDataResponse:
-      type: object
-      properties:
-        areaId:
-          type: string
-          description: エリアID
-        areaName:
-          type: string
-          description: エリア名
-        duration:
-          type: integer
-          description: 取得期間（年数）
-        chartLabels:
-          type: array
-          items:
-            type: string
-          description: チャートのラベル配列
-        priceData:
-          type: array
-          items:
-            type: number
-          description: 価格データ配列（万円）
-        unitPriceData:
-          type: array
-          items:
-            type: number
-          description: 単価データ配列（万円/㎡）
-
-    TransactionSearchRequest:
-      type: object
-      required:
-        - areaIds
-      properties:
-        areaIds:
-          type: array
-          items:
-            type: string
-          description: 検索対象エリアID配列
-        propertyTypes:
-          type: array
-          items:
-            type: string
-            enum: ["中古マンション等", "宅地(土地と建物)", "宅地(土地)"]
-          description: 物件タイプフィルタ
-        structures:
-          type: array
-          items:
-            type: string
-            enum: ["wood", "RC", "SRC"]
-          description: 構造フィルタ
-        layouts:
-          type: array
-          items:
-            type: string
-          description: 間取りフィルタ
-        limit:
-          type: integer
-          default: 50
-          description: 取得件数上限
-        offset:
-          type: integer
-          default: 0
-          description: 取得開始位置
-
-    TransactionHistoryResponse:
-      type: object
-      properties:
-        transactions:
-          type: array
-          items:
-            $ref: "#/components/schemas/TransactionRecord"
-        totalCount:
-          type: integer
-          description: 総取引件数
-        hasMore:
-          type: boolean
-          description: さらに取引データがあるかどうか
-
-    TransactionRecord:
-      type: object
-      required:
-        - Type
-        - Prefecture
-        - Municipality
-        - TradePrice
-        - Period
-      properties:
-        Type:
-          type: string
-          enum: ["中古マンション等", "宅地(土地と建物)", "宅地(土地)"]
-          description: 取引物件の種類
-          example: "中古マンション等"
-        Prefecture:
-          type: string
-          description: 都道府県名
-          example: "東京都"
-        Municipality:
-          type: string
-          description: 市区町村名
-          example: "港区"
-        DistrictName:
-          type: string
-          description: 地区名（町名等）
-          example: "東新橋"
-        TradePrice:
-          type: string
-          description: 取引価格（円、文字列形式）
-          example: "180000000"
-        Area:
-          type: string
-          description: 面積（㎡、文字列形式）
-          example: "65"
-        BuildingYear:
-          type: string
-          description: 建築年
-          example: "2002年"
-        Structure:
-          type: string
-          description: 建物の構造
-          example: "ＲＣ"
-        CityPlanning:
-          type: string
-          description: 都市計画区域
-          example: "商業地域"
-        CoverageRatio:
-          type: string
-          description: 建ぺい率（%、文字列形式）
-          example: "80"
-        FloorAreaRatio:
-          type: string
-          description: 容積率（%、文字列形式）
-          example: "600"
-        Period:
-          type: string
-          description: 取引時期（四半期表示）
-          example: "2025年第1四半期"
-        Renovation:
-          type: string
-          description: リフォーム・リノベーション状況
-          example: ""
-
-    PrefecturesResponse:
-      type: object
-      properties:
-        prefectures:
-          type: array
-          items:
-            $ref: "#/components/schemas/Prefecture"
-
-    Prefecture:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 都道府県コード
-        name:
-          type: string
-          description: 都道府県名
-        cities:
-          type: array
-          items:
-            $ref: "#/components/schemas/City"
-
-    City:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 市区町村コード
-        name:
-          type: string
-          description: 市区町村名
-
-    StationsResponse:
-      type: object
-      properties:
-        stations:
-          type: array
-          items:
-            $ref: "#/components/schemas/Station"
-
-    Station:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 駅・地区コード
-        name:
-          type: string
-          description: 駅・地区名
-        stationType:
-          type: string
-          enum: ["station", "district"]
-          description: タイプ（駅または地区）
+          description: 最寄り駅名
 
     MunicipalitiesResponse:
       type: object
@@ -490,29 +418,6 @@ components:
           type: string
           description: 地区名
 
-    MarketSummaryResponse:
-      type: object
-      properties:
-        totalAreas:
-          type: integer
-          description: 総エリア数
-        totalTransactions:
-          type: integer
-          description: 総取引件数
-        averagePrice:
-          type: number
-          description: 全体平均価格（万円）
-        averageUnitPrice:
-          type: number
-          description: 全体平均単価（万円/㎡）
-        priceChangeRate:
-          type: number
-          description: 価格変動率（%）
-        lastUpdated:
-          type: string
-          format: date-time
-          description: 最終更新日時
-
     ErrorResponse:
       type: object
       properties:
@@ -536,7 +441,5 @@ security:
   - ApiKeyAuth: []
 
 tags:
-  - name: Areas
-    description: エリア検索・管理
-  - name: Locations
-    description: 地域情報
+  - name: Estate
+    description: 不動産情報

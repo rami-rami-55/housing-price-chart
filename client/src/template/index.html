@@ -390,37 +390,33 @@
       ];
       let nextAreaId = 3;
 
-      // グラフ描画用のマスターデータ（時系列データに更新）
+      // グラフ描画用のマスターデータ（四半期データに修正）
       const masterTimeSeriesData = [
-        { label: '2020/1月', price: 4000, unitPrice: 60, area: 'area-1' },
-        { label: '2021/1月', price: 4500, unitPrice: 68, area: 'area-1' },
-        { label: '2022/1月', price: 4900, unitPrice: 75, area: 'area-1' },
-        { label: '2023/1月', price: 5200, unitPrice: 80, area: 'area-1' },
-        { label: '2023/4月', price: 5300, unitPrice: 82, area: 'area-1' },
-        { label: '2023/7月', price: 5380, unitPrice: 83, area: 'area-1' },
-        { label: '2023/10月', price: 5500, unitPrice: 87, area: 'area-1' },
-        { label: '2024/1月', price: 5600, unitPrice: 88, area: 'area-1' },
-        { label: '2024/4月', price: 5700, unitPrice: 89, area: 'area-1' },
-        { label: '2024/7月', price: 5800, unitPrice: 90, area: 'area-1' },
-        { label: '2024/10月', price: 5900, unitPrice: 92, area: 'area-1' },
+        { label: '2023年Q1', price: 4900, unitPrice: 75, area: 'area-1' },
+        { label: '2023年Q2', price: 5300, unitPrice: 82, area: 'area-1' },
+        { label: '2023年Q3', price: 5400, unitPrice: 85, area: 'area-1' },
+        { label: '2023年Q4', price: 5500, unitPrice: 87, area: 'area-1' },
+        { label: '2024年Q1', price: 5600, unitPrice: 88, area: 'area-1' },
+        { label: '2024年Q2', price: 5700, unitPrice: 89, area: 'area-1' },
+        { label: '2024年Q3', price: 5800, unitPrice: 90, area: 'area-1' },
+        { label: '2024年Q4', price: 5900, unitPrice: 92, area: 'area-1' },
+        { label: '2025年Q1', price: 6000, unitPrice: 95, area: 'area-1' },
 
-        { label: '2020/1月', price: 3500, unitPrice: 50, area: 'area-2' },
-        { label: '2021/1月', price: 3800, unitPrice: 55, area: 'area-2' },
-        { label: '2022/1月', price: 4100, unitPrice: 60, area: 'area-2' },
-        { label: '2023/1月', price: 4400, unitPrice: 65, area: 'area-2' },
-        { label: '2023/4月', price: 4500, unitPrice: 67, area: 'area-2' },
-        { label: '2023/7月', price: 4600, unitPrice: 68, area: 'area-2' },
-        { label: '2023/10月', price: 4700, unitPrice: 70, area: 'area-2' },
-        { label: '2024/1月', price: 4800, unitPrice: 72, area: 'area-2' },
-        { label: '2024/4月', price: 4900, unitPrice: 74, area: 'area-2' },
-        { label: '2024/7月', price: 5000, unitPrice: 75, area: 'area-2' },
-        { label: '2024/10月', price: 5100, unitPrice: 77, area: 'area-2' },
+        { label: '2023年Q1', price: 4100, unitPrice: 60, area: 'area-2' },
+        { label: '2023年Q2', price: 4500, unitPrice: 67, area: 'area-2' },
+        { label: '2023年Q3', price: 4600, unitPrice: 68, area: 'area-2' },
+        { label: '2023年Q4', price: 4700, unitPrice: 70, area: 'area-2' },
+        { label: '2024年Q1', price: 4800, unitPrice: 72, area: 'area-2' },
+        { label: '2024年Q2', price: 4900, unitPrice: 74, area: 'area-2' },
+        { label: '2024年Q3', price: 5000, unitPrice: 75, area: 'area-2' },
+        { label: '2024年Q4', price: 5100, unitPrice: 77, area: 'area-2' },
+        { label: '2025年Q1', price: 5200, unitPrice: 79, area: 'area-2' },
       ];
 
-      // 直近の取引履歴用ダミーデータ (city, district はダミーとして使用)
+      // 直近の取引履歴用ダミーデータ (四半期形式に修正)
       const recentHistoryData = [
         {
-          date: '2024年10月',
+          date: '2025年Q1',
           price: 6200,
           layout: '2LDK',
           structure: '木造',
@@ -429,7 +425,7 @@
           areaName: '世田谷',
         },
         {
-          date: '2024年09月',
+          date: '2024年Q4',
           price: 5500,
           layout: '1K',
           structure: 'RC',
@@ -438,7 +434,7 @@
           areaName: '自由が丘駅',
         },
         {
-          date: '2024年09月',
+          date: '2024年Q4',
           price: 5900,
           layout: '3LDK',
           structure: 'SRC',
@@ -447,7 +443,7 @@
           areaName: '世田谷',
         },
         {
-          date: '2024年08月',
+          date: '2024年Q3',
           price: 5100,
           layout: '4LDK+',
           structure: '木造',
@@ -456,7 +452,7 @@
           areaName: '新宿地区',
         },
         {
-          date: '2024年07月',
+          date: '2024年Q3',
           price: 4200,
           layout: '2DK',
           structure: 'RC',
@@ -465,7 +461,7 @@
           areaName: '自由が丘駅',
         },
         {
-          date: '2024年07月',
+          date: '2024年Q2',
           price: 5300,
           layout: '2K',
           structure: '木造',
@@ -474,7 +470,7 @@
           areaName: '渋谷地区',
         },
         {
-          date: '2024年06月',
+          date: '2024年Q2',
           price: 4500,
           layout: '3DK',
           structure: 'SRC',
@@ -483,7 +479,7 @@
           areaName: '世田谷',
         },
         {
-          date: '2024年05月',
+          date: '2024年Q1',
           price: 5000,
           layout: '1LDK',
           structure: 'RC',
@@ -492,7 +488,7 @@
           areaName: '自由が丘駅',
         },
         {
-          date: '2024年04月',
+          date: '2024年Q1',
           price: 5800,
           layout: '4DK',
           structure: '木造',
@@ -501,7 +497,7 @@
           areaName: '新宿地区',
         },
         {
-          date: '2024年03月',
+          date: '2023年Q4',
           price: 4100,
           layout: '1K',
           structure: 'RC',
@@ -510,7 +506,7 @@
           areaName: '渋谷地区',
         },
         {
-          date: '2024年02月',
+          date: '2023年Q4',
           price: 4700,
           layout: '2LDK',
           structure: 'SRC',
@@ -519,7 +515,7 @@
           areaName: '世田谷',
         },
         {
-          date: '2024年01月',
+          date: '2023年Q3',
           price: 5200,
           layout: '3LDK',
           structure: '木造',
@@ -528,7 +524,7 @@
           areaName: '自由が丘駅',
         },
         {
-          date: '2023年12月',
+          date: '2023年Q3',
           price: 4300,
           layout: '2DK',
           structure: 'RC',
@@ -537,7 +533,7 @@
           areaName: '渋谷地区',
         },
         {
-          date: '2023年11月',
+          date: '2023年Q2',
           price: 5600,
           layout: '4LDK+',
           structure: '木造',
@@ -614,22 +610,43 @@
         });
       };
 
-      // 集計期間に基づきデータをフィルタリングする関数
+      // 集計期間に基づきデータをフィルタリングする関数 (四半期ベースに修正)
       const filterDataByDuration = (data, durationInYears) => {
         const currentYear = new Date().getFullYear();
-        const startYear = currentYear - durationInYears + 1; // 期間の開始年 (例: 2024 - 3 + 1 = 2022)
+        const currentQuarter = Math.floor(new Date().getMonth() / 3) + 1; // 1-4
 
-        const startDate = new Date(startYear, 0, 1);
-        const endDate = new Date(currentYear + 1, 0, 1); // 終了年の翌年1月1日まで
+        // 期間の開始四半期を計算
+        let startYear = currentYear - durationInYears;
+        let startQuarter = currentQuarter + 1; // n年前のQ(currentQuarter+1)から開始
 
+        if (startQuarter > 4) {
+          startQuarter -= 4;
+          startYear += 1;
+        }
+
+        const startDateLabel = `${startYear}年Q${startQuarter}`;
+
+        // ラベルを比較可能な形式 (YYYYQQ) に変換する関数
+        const labelToComparable = (label) => {
+          const match = label.match(/(\d{4})年Q(\d)/);
+          if (match) {
+            return parseInt(match[1]) * 10 + parseInt(match[2]);
+          }
+          return 0;
+        };
+
+        const comparableStartDate = labelToComparable(startDateLabel);
+        const comparableEndDate = labelToComparable(`${currentYear}年Q${currentQuarter}`);
+
+        // フィルタリング
         const filteredData = data.filter((item) => {
-          // ラベル 'YYYY/MM月' を Date オブジェクトに変換
-          const [year, month] = item.label.replace('月', '').split('/').map(Number);
-          const itemDate = new Date(year, month - 1, 1);
-
-          // 期間内にあるかチェック
-          return itemDate >= startDate && itemDate < endDate;
+          const itemComparable = labelToComparable(item.label);
+          return itemComparable >= comparableStartDate && itemComparable <= comparableEndDate;
         });
+
+        // ラベルのソート (新しいデータがソート順の最後に来るように)
+        filteredData.sort((a, b) => labelToComparable(a.label) - labelToComparable(b.label));
+
         return filteredData;
       };
 
@@ -642,7 +659,7 @@
         const filteredTimeSeries = filterDataByDuration(masterTimeSeriesData, durationInYears);
 
         // グラフのラベルを抽出 (重複なし)
-        const chartLabels = [...new Set(filteredTimeSeries.map((item) => item.label))].sort();
+        const chartLabels = [...new Set(filteredTimeSeries.map((item) => item.label))];
 
         // 選択されているエリアのデータセットを構築
         const isPrice = currentChartType === 'price';
@@ -733,7 +750,7 @@
                 x: {
                   title: {
                     display: true,
-                    text: '年月',
+                    text: '四半期',
                     color: '#4b5563',
                   },
                 },
@@ -977,6 +994,15 @@
       // 直近の売買履歴テーブル表示/非表示のロジック (選択エリアでフィルタリング)
       // -----------------------------------------------------------
 
+      // 四半期ラベルを比較可能な形式 (YYYYQQ) に変換する関数
+      const historyLabelToComparable = (label) => {
+        const match = label.match(/(\d{4})年Q(\d)/);
+        if (match) {
+          return parseInt(match[1]) * 10 + parseInt(match[2]);
+        }
+        return 0;
+      };
+
       const renderHistoryTable = () => {
         historyContainer.innerHTML = ''; // コンテナをクリア
 
@@ -995,7 +1021,6 @@
           // データをフィルタリング
           const filteredHistory = recentHistoryData.filter((history) => {
             // 履歴データ内の areaName が、選択された areaName に含まれているかチェック
-            // 注: ダミーデータでは '世田谷' や '自由が丘駅' でフィルタリングされます。
             return history.areaName.includes(historyFilterAreaName);
           });
 
@@ -1039,19 +1064,15 @@
                     `;
             const tbody = table.querySelector('tbody');
 
-            // データを日付順にソートして表示
+            // データを日付順にソートして表示 (四半期ベースのソートに修正)
             filteredHistory
-              .sort(
-                (a, b) =>
-                  new Date(b.date.replace('年', '/').replace('月', '/')) -
-                  new Date(a.date.replace('年', '/').replace('月', '/'))
-              )
+              .sort((a, b) => historyLabelToComparable(b.date) - historyLabelToComparable(a.date))
               .forEach((history) => {
                 const row = tbody.insertRow();
                 row.className = 'hover:bg-gray-50';
 
                 const data = [
-                  history.date,
+                  history.date, // 四半期形式で表示
                   history.price.toLocaleString(),
                   history.layout,
                   history.structure,

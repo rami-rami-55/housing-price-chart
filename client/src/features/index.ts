@@ -7,7 +7,7 @@ export { default as HamburgerMenuButton } from './HamburgerMenuButton';
 export { default as MultiLayoutSelector } from './LayoutSelector';
 export { default as LocationSelector } from './LocationSelector';
 export { default as MainBoard } from './MainBoard';
-export { default as MultiPropertyTypeSelector } from './PropertyTypeSelector';
+export { default as PropertyTypeSelector } from './PropertyTypeSelector';
 export { default as RealEstatePriceChart } from './RealEstatePriceChart';
 export { default as SearchButton } from './SearchButton';
 export { default as Sidebar } from './Sidebar';

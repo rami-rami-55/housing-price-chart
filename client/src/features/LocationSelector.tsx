@@ -17,8 +17,9 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold text-gray-700 mb-2">地域</h2>
+    <div>
+      <h2 className="text-lg font-semibold text-gray-700 mb-2">最寄駅</h2>
+      <p className="text-sm text-gray-500 mb-3">駅を抜いて入力してください</p>
       <input
         type="text"
         value={areaName}

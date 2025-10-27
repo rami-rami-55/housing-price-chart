@@ -28,11 +28,15 @@ interface DashboardState {
   // 複数選択の状態
   selectedStructures: string[];
   selectedLayouts: string[];
-  selectedPropertyTypes: string[];
   selectedPropertyStatuses: string[];
 
   // 期間選択
   selectedDuration: string;
+
+  // 地域選択
+  selectedPrefecture: string;
+  selectedCity: string;
+  selectedStation: string;
 }
 
 // アクションの型定義
@@ -49,6 +53,10 @@ interface DashboardActions {
   removeArea: (areaId: string) => void;
   toggleAreaSelection: (areaId: string) => void;
 
+  // 色とテキスト取得
+  getColorHex: (color: string) => string;
+  getDurationText: (duration: number) => string;
+
   // 単一選択のハンドラー
   handleStructureChange: (structure: string) => void;
   handlePropertyStatusChange: (status: string) => void;
@@ -61,23 +69,24 @@ interface DashboardActions {
   // 複数選択のハンドラー
   handleStructuresChange: (structures: string[]) => void;
   handleLayoutsChange: (layouts: string[]) => void;
-  handlePropertyTypesChange: (types: string[]) => void;
   handlePropertyStatusesChange: (statuses: string[]) => void;
 
   // 期間選択
   handleDurationChange: (duration: string) => void;
 
-  // その他
+  // 地域選択
+  handlePrefectureChange: (prefecture: string) => void;
+  handleCityChange: (city: string) => void;
+  handleStationChange: (station: string) => void;
+
+  // 検索
   handleSearch: () => void;
-  getColorHex: (colorName: string) => string;
-  getDurationText: (durationInYears: number) => string;
 }
 
 type DashboardContextType = DashboardState & DashboardActions;
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
-// カスタムフック
 export const useDashboard = () => {
   const context = useContext(DashboardContext);
   if (!context) {
@@ -86,37 +95,101 @@ export const useDashboard = () => {
   return context;
 };
 
-// 初期データ
+interface DashboardProviderProps {
+  children: ReactNode;
+}
+
+// 期間に応じたダミーデータ生成関数
+const generateDummyData = (
+  durationInYears: number,
+  basePrice: number,
+  basePricePerUnit: number
+): { priceData: number[]; unitPriceData: number[] } => {
+  let totalPoints: number;
+  switch (durationInYears) {
+    case 1:
+      totalPoints = 4; // 1年→4分割
+      break;
+    case 3:
+      totalPoints = 12; // 3年→12分割
+      break;
+    case 5:
+      totalPoints = 15; // 5年→15分割
+      break;
+    default:
+      totalPoints = Math.min(durationInYears * 4, 20);
+      break;
+  }
+
+  const priceData: number[] = [];
+  const unitPriceData: number[] = [];
+
+  // 期間全体での価格変動率（年間約5-10%の上昇を想定）
+  const totalGrowthRate = durationInYears * 0.07; // 年7%の上昇
+
+  for (let i = 0; i < totalPoints; i++) {
+    const progress = i / (totalPoints - 1);
+
+    // 基本的な上昇トレンドに少しの変動を追加
+    const trendGrowth = progress * totalGrowthRate;
+    const randomVariation = (Math.random() - 0.5) * 0.05; // ±2.5%の変動
+    const growthFactor = 1 + trendGrowth + randomVariation;
+
+    priceData.push(Math.round(basePrice * growthFactor));
+    unitPriceData.push(Math.round(basePricePerUnit * growthFactor));
+  }
+
+  return { priceData, unitPriceData };
+};
+
+// チャートラベル生成関数（四半期ベース）
 const generateChartLabels = (durationInYears: number): string[] => {
   const labels: string[] = [];
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
+  const currentQuarter = Math.floor(currentDate.getMonth() / 3) + 1; // 1-4
 
-  const totalPoints = 10;
-  const totalMonths = durationInYears * 12;
+  const totalQuarters = durationInYears * 4;
 
+  // 期間に応じた分割数を設定
+  let totalPoints: number;
+  switch (durationInYears) {
+    case 1:
+      totalPoints = 4; // 1年→4分割（四半期ごと）
+      break;
+    case 3:
+      totalPoints = 12; // 3年→12分割（四半期ごと）
+      break;
+    case 5:
+      totalPoints = 15; // 5年→15分割
+      break;
+    default:
+      totalPoints = Math.min(totalQuarters, 20); // デフォルトは四半期数、最大20
+      break;
+  }
+
+  // 期間の開始四半期を計算
   let startYear = currentYear;
-  let startMonth = currentMonth - totalMonths + 1;
+  let startQuarter = currentQuarter - totalQuarters + 1;
 
-  while (startMonth <= 0) {
+  while (startQuarter <= 0) {
     startYear--;
-    startMonth += 12;
+    startQuarter += 4;
   }
 
   for (let i = 0; i < totalPoints; i++) {
     const progress = i / (totalPoints - 1);
-    const monthsFromStart = Math.round(progress * (totalMonths - 1));
+    const quartersFromStart = Math.round(progress * (totalQuarters - 1));
 
     let targetYear = startYear;
-    let targetMonth = startMonth + monthsFromStart;
+    let targetQuarter = startQuarter + quartersFromStart;
 
-    while (targetMonth > 12) {
+    while (targetQuarter > 4) {
       targetYear++;
-      targetMonth -= 12;
+      targetQuarter -= 4;
     }
 
-    labels.push(`${targetYear}/${targetMonth}月`);
+    labels.push(`${targetYear}年Q${targetQuarter}`);
   }
 
   return labels;
@@ -151,42 +224,30 @@ const initialAreas: ComparisonArea[] = [
   },
 ];
 
-// エリアのマスターデータ
 const initialAreaMasterData: Record<string, AreaData> = {
   'area-1': {
-    priceData: [5200, 5250, 5230, 5300, 5350, 5400, 5380, 5450, 5480, 5500],
-    unitPriceData: [80, 81, 80, 82, 83, 84, 83, 85, 86, 87],
+    id: 'area-1',
+    name: '世田谷',
+    priceData: [4900, 5300, 5600, 6000], // 1年間の4四半期
+    unitPriceData: [75, 82, 88, 95], // 1年間の4四半期
   },
   'area-2': {
-    priceData: [4800, 4850, 4820, 4900, 4950, 5000, 4980, 5050, 5080, 5100],
-    unitPriceData: [65, 66, 65, 67, 68, 69, 68, 70, 71, 72],
-  },
-  'area-3': {
-    priceData: [4000, 4100, 4050, 4150, 4200, 4250, 4280, 4300, 4350, 4400],
-    unitPriceData: [50, 51, 50, 52, 53, 54, 53, 55, 56, 57],
-  },
-  'area-4': {
-    priceData: [5500, 5550, 5520, 5600, 5650, 5700, 5680, 5750, 5780, 5800],
-    unitPriceData: [90, 91, 90, 92, 93, 94, 93, 95, 96, 97],
-  },
-  'area-5': {
-    priceData: [4500, 4550, 4520, 4600, 4650, 4700, 4680, 4750, 4780, 4800],
-    unitPriceData: [70, 71, 70, 72, 73, 74, 73, 75, 76, 77],
+    id: 'area-2',
+    name: '自由が丘駅',
+    priceData: [4100, 4500, 4800, 5200], // 1年間の4四半期
+    unitPriceData: [60, 67, 72, 79], // 1年間の4四半期
   },
 };
 
-// プロバイダーコンポーネント
-interface DashboardProviderProps {
-  children: ReactNode;
-}
-
 export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }) => {
-  // 状態の定義
+  // 状態管理
   const [chartType, setChartType] = useState<ChartType>('price');
   const [chartLabels, setChartLabels] = useState(generateChartLabels(1));
   const [comparisonAreas, setComparisonAreas] = useState<ComparisonArea[]>(initialAreas);
   const [areaMasterData] = useState<Record<string, AreaData>>(initialAreaMasterData);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // 単一選択用の状態
   const [selectedStructure, setSelectedStructure] = useState('wood');
   const [selectedPropertyStatus, setSelectedPropertyStatus] = useState('new');
   const [selectedPropertyType, setSelectedPropertyType] = useState('mansion');
@@ -198,11 +259,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   // 複数選択用の状態
   const [selectedStructures, setSelectedStructures] = useState<string[]>(['wood']);
   const [selectedLayouts, setSelectedLayouts] = useState<string[]>(['1R_1K']);
-  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>(['mansion']);
   const [selectedPropertyStatuses, setSelectedPropertyStatuses] = useState<string[]>(['new']);
 
   // 期間選択用の状態
   const [selectedDuration, setSelectedDuration] = useState('1');
+
+  // 地域選択用の状態
+  const [selectedPrefecture, setSelectedPrefecture] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedStation, setSelectedStation] = useState('');
 
   // アクションの実装
   const addArea = useCallback(() => {
@@ -211,43 +276,27 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
       return;
     }
 
-    // 利用可能な色を取得
-    const availableColors = ['red', 'green', 'yellow', 'purple', 'indigo', 'pink', 'teal'];
+    const newAreaId = `area-${Date.now()}`;
+    const availableColors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
     const assignedColors = comparisonAreas.map((a) => a.color);
     const availableColor =
-      availableColors.find((color) => !assignedColors.includes(color)) ||
-      availableColors[comparisonAreas.length % availableColors.length];
+      availableColors.find((color) => !assignedColors.includes(color)) || 'gray';
 
-    const newAreaId = `area-${Date.now()}`;
     const newArea: ComparisonArea = {
       id: newAreaId,
-      name: selectedAreaName, // 駅名/エリア名のみを表示名とする
+      name: selectedAreaName,
       color: availableColor,
       selected: true,
-      propertyType: selectedPropertyTypes[0] || 'マンション',
+      propertyType: selectedPropertyType || 'マンション',
       propertyStatus: selectedPropertyStatuses[0] || '新築',
       structure: selectedStructures[0] || '木造',
       layouts: selectedLayouts.length > 0 ? selectedLayouts : ['1R_1K'],
       startYear: '2023',
       endYear: '2024',
-      durationInYears: parseInt(selectedDuration),
+      durationInYears: parseInt(selectedDuration) || 1,
     };
 
     setComparisonAreas((prev) => [...prev, newArea]);
-
-    // 新規エリアのダミーデータ生成（実際はAPIコールで取得）
-    const basePrice = 4000 + Math.random() * 2000;
-    const baseUnitPrice = 60 + Math.random() * 30;
-    const newAreaData: AreaData = {
-      priceData: Array.from({ length: 10 }, (_, i) => basePrice + (Math.random() - 0.5) * 500),
-      unitPriceData: Array.from(
-        { length: 10 },
-        (_, i) => baseUnitPrice + (Math.random() - 0.5) * 10
-      ),
-    };
-
-    // マスターデータに追加（本来はサーバーから取得）
-    areaMasterData[newAreaId] = newAreaData;
 
     // フォームをクリア
     setSelectedAreaName('');
@@ -255,13 +304,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     console.log('Added new area:', newArea);
   }, [
     selectedAreaName,
-    selectedPropertyTypes,
+    selectedPropertyType,
     selectedPropertyStatuses,
     selectedStructures,
     selectedLayouts,
     selectedDuration,
     comparisonAreas,
-    areaMasterData,
   ]);
 
   const removeArea = useCallback((areaId: string) => {
@@ -274,10 +322,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     );
   }, []);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
 
+  // 単一選択のハンドラー
   const handleStructureChange = (structure: string) => {
     setSelectedStructure(structure);
     console.log('Selected structure:', structure);
@@ -313,6 +362,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     console.log('Selected end year:', year);
   };
 
+  // 複数選択のハンドラー
   const handleStructuresChange = (structures: string[]) => {
     setSelectedStructures(structures);
     console.log('Selected structures:', structures);
@@ -323,51 +373,66 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     console.log('Selected layouts:', layouts);
   };
 
-  const handlePropertyTypesChange = (types: string[]) => {
-    setSelectedPropertyTypes(types);
-    console.log('Selected property types:', types);
-  };
-
   const handlePropertyStatusesChange = (statuses: string[]) => {
     setSelectedPropertyStatuses(statuses);
     console.log('Selected property statuses:', statuses);
   };
 
+  // 期間選択のハンドラー
   const handleDurationChange = (duration: string) => {
     setSelectedDuration(duration);
-    const newLabels = generateChartLabels(parseInt(duration));
-    setChartLabels(newLabels);
-
-    // 既存のエリアの期間も更新
-    setComparisonAreas((prev) =>
-      prev.map((area) => ({
-        ...area,
-        durationInYears: parseInt(duration),
-      }))
-    );
-
+    setChartLabels(generateChartLabels(parseInt(duration)));
     console.log('Selected duration:', duration);
   };
 
+  // 地域選択のハンドラー
+  const handlePrefectureChange = (prefecture: string) => {
+    setSelectedPrefecture(prefecture);
+    setSelectedCity(''); // 都道府県が変わったら市区町村をリセット
+    setSelectedStation(''); // 駅もリセット
+    console.log('Selected prefecture:', prefecture);
+  };
+
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
+    setSelectedStation(''); // 市区町村が変わったら駅をリセット
+    console.log('Selected city:', city);
+  };
+
+  const handleStationChange = (station: string) => {
+    setSelectedStation(station);
+    console.log('Selected station:', station);
+  };
+
+  // 検索ハンドラー
   const handleSearch = () => {
-    console.log('Search button clicked');
+    console.log('Search triggered with:', {
+      propertyType: selectedPropertyType,
+      structures: selectedStructures,
+      layouts: selectedLayouts,
+      prefecture: selectedPrefecture,
+      city: selectedCity,
+      station: selectedStation,
+      duration: selectedDuration,
+    });
   };
 
-  const getColorHex = (colorName: string): string => {
-    const colors: Record<string, string> = {
-      red: '#ef4444',
-      green: '#10b981',
-      yellow: '#f59e0b',
-      purple: '#a855f7',
-      indigo: '#6366f1',
-      pink: '#ec4899',
-      teal: '#14b8a6',
+  // 色とテキスト取得関数
+  const getColorHex = (color: string): string => {
+    const colorMap: Record<string, string> = {
+      red: '#EF4444',
+      blue: '#3B82F6',
+      green: '#10B981',
+      yellow: '#F59E0B',
+      purple: '#8B5CF6',
+      orange: '#F97316',
+      gray: '#6B7280',
     };
-    return colors[colorName] || '#3b82f6';
+    return colorMap[color] || '#6B7280';
   };
 
-  const getDurationText = (durationInYears: number): string => {
-    return `直近${durationInYears}年`;
+  const getDurationText = (duration: number): string => {
+    return duration === 1 ? '1年間' : `${duration}年間`;
   };
 
   const contextValue: DashboardContextType = {
@@ -386,9 +451,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     endYear,
     selectedStructures,
     selectedLayouts,
-    selectedPropertyTypes,
     selectedPropertyStatuses,
     selectedDuration,
+    selectedPrefecture,
+    selectedCity,
+    selectedStation,
 
     // アクション
     setChartType,
@@ -406,9 +473,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     handleEndYearChange,
     handleStructuresChange,
     handleLayoutsChange,
-    handlePropertyTypesChange,
     handlePropertyStatusesChange,
     handleDurationChange,
+    handlePrefectureChange,
+    handleCityChange,
+    handleStationChange,
     handleSearch,
     getColorHex,
     getDurationText,
@@ -416,3 +485,5 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
 
   return <DashboardContext.Provider value={contextValue}>{children}</DashboardContext.Provider>;
 };
+
+export default DashboardContext;

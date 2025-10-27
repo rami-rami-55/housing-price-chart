@@ -13,6 +13,8 @@ export type ComparisonArea = {
 };
 
 export type AreaData = {
+  id: string;
+  name: string;
   priceData: number[];
   unitPriceData: number[];
 };
