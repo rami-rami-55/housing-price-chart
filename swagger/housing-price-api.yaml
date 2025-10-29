@@ -38,7 +38,7 @@ paths:
             schema:
               $ref: "#/components/schemas/AreaSearchRequest"
             example:
-              propertyTypes: ["中古マンション等"]
+              propertyTypes: "中古マンション等"
               structures: ["wood"]
               layouts: ["2K", "2DK"]
               station: "北千住"
