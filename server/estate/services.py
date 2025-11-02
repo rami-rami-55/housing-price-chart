@@ -41,13 +41,14 @@ class EstateService:
         """APIデータを詳細表示用に加工"""
 
         processed_data = []
+        for i, item in enumerate(api_data):
 
-        for item in api_data:
-            if item.get("PropertyType", "") != property_type:
+            # フィルタリング条件をチェック
+            if property_type and item.get("Type", "") != property_type:
                 continue
-            if item.get("Structure", "") not in structures:
+            if structures and item.get("Structure", "") not in structures:
                 continue
-            if item.get("FloorPlan", "") not in layouts:
+            if layouts and item.get("FloorPlan", "") not in layouts:
                 continue
 
             # 国交省APIの項目名に合わせてマッピング

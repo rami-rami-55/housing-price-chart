@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views import EstateAverageView, EstateDetailView
+from .views import EstateAverageView, EstateHistoryView
 
 urlpatterns = [
-    path('detail/', EstateDetailView.as_view(), name='estate-detail'),
-    path('average/', EstateAverageView.as_view(), name='estate-average'),
+    path("history/", EstateHistoryView.as_view(), name="estate-history"),
+    path("average/", EstateAverageView.as_view(), name="estate-average"),
 ]

@@ -22,7 +22,7 @@ class EstateHistoryView(APIView):
             property_type = data.get("propertyType", "")
             structures = data.get("structures", [])
             layouts = data.get("layouts", [])
-            station_name = data.get("stationName", "")
+            station_name = data.get("station", "")
 
             # 必須パラメータのバリデーション
             if not station_name:
@@ -93,7 +93,9 @@ class EstateAverageView(APIView):
                 property_type = area.get("propertyType", "")
                 structures = area.get("structures", [])
                 layouts = area.get("layouts", [])
-                station_name = area.get("stationName", "")
+                station_name = area.get("station", "")
+                print("station_name", station_name)
+                print("area", area)
 
                 for year in years:
                     target_year_data = self.estate_service.get_estate_detail(
@@ -101,7 +103,7 @@ class EstateAverageView(APIView):
                         structures=structures,
                         layouts=layouts,
                         station_name=station_name,
-                        year=year,
+                        year=str(year),
                     )
                     all_year_data.append({"year": year, "data": target_year_data})
 
@@ -110,7 +112,7 @@ class EstateAverageView(APIView):
                 )
                 area_price_list.append(
                     {
-                        "areaName": station_name,
+                        "stationName": station_name,
                         "priceData": average_price_list,
                         "unitPriceData": average_unit_price_list,
                     }

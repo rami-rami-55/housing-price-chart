@@ -16,22 +16,29 @@ class RealEstateRepository:
         url = settings.MLIT_API_ENDPOINT
         params = {"year": year, "priceClassification": "01", "station": station_code}
 
-        response = requests.get(
-            url,
-            params=params,
-            headers={
-                "Ocp-Apim-Subscription-Key": token,
-            },
-        )
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                headers={
+                    "Ocp-Apim-Subscription-Key": token,
+                },
+            )
 
-        response.raise_for_status()
-        api_response = response.json()
+            response.raise_for_status()
+            api_response = response.json()
 
-        # data配列の中身だけを返却（エラーハンドリング付き）
-        if api_response.get("status") == "OK" and "data" in api_response:
-            return api_response["data"]
-        else:
-            logger.warning(f"API response error: status={api_response.get('status', 'Unknown')}")
+            # data配列の中身だけを返却（エラーハンドリング付き）
+            if api_response.get("status") == "OK" and "data" in api_response:
+                return api_response["data"]
+            else:
+                logger.warning(
+                    f"API response error: status={api_response.get('status', 'Unknown')}"
+                )
+                return []
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request failed: {str(e)}")
             return []
 
 
@@ -46,8 +53,8 @@ class StationCodeRepository:
                 os.path.dirname(base_dir), "stations", "N02-22_Station.shp"
             )
 
-            # Shapefileを読み込み
-            gdf = gpd.read_file(shapefile_path)
+            # Shapefileを読み込み（UTF-8エンコーディングを指定）
+            gdf = gpd.read_file(shapefile_path, encoding="utf-8")
 
             # 駅名で検索
             target_station = gdf[gdf["N02_005"] == station_name]

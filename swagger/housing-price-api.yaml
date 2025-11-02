@@ -115,7 +115,7 @@ paths:
                   - "2025年第2四半期"
                   - "2025年第3四半期"
                 areas:
-                  - areaName: "北千住駅"
+                  - stationName: "北千住駅"
                     priceData:
                       [
                         4200,
@@ -146,7 +146,7 @@ paths:
                         80.5,
                         81.7,
                       ]
-                  - areaName: "綾瀬駅"
+                  - stationName: "綾瀬駅"
                     priceData:
                       [
                         3800,
@@ -177,7 +177,7 @@ paths:
                         73.8,
                         75.0,
                       ]
-                  - areaName: "亀有駅"
+                  - stationName: "亀有駅"
                     priceData:
                       [
                         3500,
@@ -341,7 +341,7 @@ components:
     AreaPriceHistory:
       type: object
       properties:
-        areaName:
+        stationName:
           type: string
           description: エリア名（駅名・地区名）
         priceData:
