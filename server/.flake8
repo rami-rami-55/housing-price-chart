@@ -1,0 +1,20 @@
+[flake8]
+max-line-length = 100
+extend-ignore = E203,E501,W503,W293,W291,DJ01,DJ03
+exclude = 
+    .git,
+    __pycache__,
+    venv,
+    env,
+    .venv,
+    migrations,
+    build,
+    dist,
+    .tox,
+    .coverage,
+    htmlcov,
+    node_modules
+per-file-ignores =
+    */settings.py:E501,F401,F403
+    */migrations/*.py:E501,F401,F403
+    manage.py:E501,F401,F403

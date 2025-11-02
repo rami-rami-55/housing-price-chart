@@ -1,2 +1,3 @@
 venv
-stations
+*.pyc
+__pycache__/

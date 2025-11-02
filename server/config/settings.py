@@ -136,3 +136,6 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+MLIT_API_TOKEN = "351d48bdfc9d4ad78563b1c0b32e861d"
+MLIT_API_ENDPOINT = "https://www.reinfolib.mlit.go.jp/ex-api/external/XIT001"
