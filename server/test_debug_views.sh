@@ -11,10 +11,10 @@ curl -X POST http://localhost:8000/api/estate/history/ \
       "２ＤＫ"
     ],
     "station": "北千住"
-  }' | python -m json.tool
+  }' | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=2))"
 
 
-echo "api/estate/averageのテスト"
+echo -e "\napi/estate/averageのテスト"
 curl -X POST http://localhost:8000/api/estate/average/ \
   -H "Content-Type: application/json" \
   -d '{
@@ -33,4 +33,4 @@ curl -X POST http://localhost:8000/api/estate/average/ \
       }
     ],
     "durationInYears": 3
-  }' | python -m json.tool
+  }' | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=2))"
